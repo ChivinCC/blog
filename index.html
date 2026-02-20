@@ -421,17 +421,17 @@ footer {
   /* Nav: brand left, search fills right */
   .brand-name { font-size: 14px; }
 
-  /* Header: stack vertically on mobile */
+  /* Header: keep horizontal on mobile, shrink QR */
   .home-header {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     gap: 16px;
     padding: 24px 0 16px;
   }
-  .header-qr { flex-direction: row; align-self: flex-start; padding-bottom: 0; }
+  .header-qr { padding-bottom: 0; }
   .header-qr-img { width: 52px; height: 52px; }
-  .header-qr-label { text-align: left; }
-  .header-title { font-size: 18px; }
+  .header-qr-label { font-size: 9px; }
+  .header-title { font-size: 17px; }
 
   /* Article rows: stack on mobile */
   .article-row {
@@ -526,49 +526,57 @@ footer {
 <footer>© 2024 百倍机会攻略 · 每天一篇，持续更新</footer>
 
 <script>
-var ARTICLES_KEY = 'baibei_articles';
-var SETTINGS_KEY = 'baibei_settings';
+var SUPABASE_URL = 'https://pmazexeasryqogyfjhbi.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_JJVVoK8dMkmjAIaklWx4dA_FOTP_7hV';
 var GS = ['g0','g1','g2','g3','g4'];
-// 创刊日期 — 用于计算日更天数（可在后台设置中修改）
-var LAUNCH_DATE = '2024-01-01';
-
 var allArticles = [], filtered = [];
 
-function init() {
-  try {
-    var raw = localStorage.getItem(ARTICLES_KEY);
-    if (raw) {
-      var parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        allArticles = parsed.sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
-        applySettings();
-        filtered = allArticles.slice();
-        renderList(filtered);
-        handleRoute();
-        return;
-      }
+function sbFetch(path, opts) {
+  return fetch(SUPABASE_URL + '/rest/v1/' + path, Object.assign({
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json'
     }
-  } catch(e) {}
-  allArticles = DEMO;
-  filtered = allArticles.slice();
-  renderList(filtered);
-  handleRoute();
+  }, opts || {}));
 }
 
-function applySettings() {
-  try {
-    var s = JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');
-    if (s.qrUrl) {
-      var h = document.getElementById('qrHolder');
-      if (h) {
-        h.innerHTML = '';
-        var img = document.createElement('img');
-        img.src = s.qrUrl; img.alt = 'QR';
-        h.appendChild(img);
-      }
+function init() {
+  document.getElementById('articleList').innerHTML =
+    '<div class="list-state"><div class="spinner"></div>正在加载…</div>';
+
+  Promise.all([
+    sbFetch('articles?select=*&order=date.desc,id.desc').then(function(r) { return r.json(); }),
+    sbFetch('settings?select=*').then(function(r) { return r.json(); })
+  ]).then(function(results) {
+    var arts = results[0];
+    var sets = results[1];
+
+    allArticles = (Array.isArray(arts) && arts.length > 0) ? arts : DEMO;
+
+    if (Array.isArray(sets)) {
+      sets.forEach(function(row) {
+        if (row.key === 'qrUrl' && row.value) {
+          var h = document.getElementById('qrHolder');
+          if (h) {
+            h.innerHTML = '';
+            var img = document.createElement('img');
+            img.src = row.value; img.alt = 'QR';
+            h.appendChild(img);
+          }
+        }
+      });
     }
-    if (s.launchDate) LAUNCH_DATE = s.launchDate;
-  } catch(e) {}
+
+    filtered = allArticles.slice();
+    renderList(filtered);
+    handleRoute();
+  }).catch(function() {
+    allArticles = DEMO;
+    filtered = allArticles.slice();
+    renderList(filtered);
+    handleRoute();
+  });
 }
 
 function calcDays() {
