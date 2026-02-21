@@ -285,13 +285,16 @@ nav {
 
 .back-btn {
   display: inline-flex; align-items: center; gap: 7px;
-  margin: 20px 0 28px;
+  margin: 0 0 28px;
   padding: 8px 14px 8px 10px;
   font-size: 13px; font-weight: 500; color: var(--t2);
   background: var(--bg2); border: 1px solid var(--line);
   border-radius: 6px; cursor: pointer;
   transition: background .15s, border-color .15s, color .15s;
   letter-spacing: 0.02em;
+  position: sticky; top: 64px; z-index: 100;
+  backdrop-filter: blur(8px);
+  background: rgba(244,239,230,0.92);
 }
 .back-btn:hover { background: var(--bg3); border-color: var(--t3); color: var(--t1); }
 .back-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
@@ -335,11 +338,7 @@ nav {
   margin: 28px 0 10px; line-height: 1.4;
 }
 .detail-body p { margin-bottom: 24px; }
-.detail-body > p:first-child::first-letter {
-  font-family: var(--serif); font-size: 2.8em; font-weight: 700;
-  float: left; line-height: 0.75; margin: 0.08em 0.08em 0 0;
-  color: var(--t1);
-}
+/* drop cap removed */
 .detail-body img { width: 100%; border-radius: 4px; margin: 28px 0; }
 .detail-body figure { margin: 32px 0; }
 .detail-body figcaption { text-align: center; font-size: 12px; color: var(--t3); margin-top: 8px; }
@@ -449,7 +448,7 @@ footer {
   /* Detail */
   .detail-title { font-size: 20px; }
   .detail-body { font-size: 15px; line-height: 1.9; }
-  .detail-body > p:first-child::first-letter { font-size: 2.4em; }
+
   .detail-body h2 { font-size: 17px; margin: 36px 0 12px; }
   .back-btn { padding: 16px 0 22px; }
 }
@@ -622,6 +621,27 @@ function handleRoute() {
   showHome();
 }
 window.addEventListener('hashchange', handleRoute);
+window.addEventListener('popstate', function(e) {
+  var state = e.state;
+  if (state && state.page === 'article' && state.id) {
+    for (var i = 0; i < allArticles.length; i++) {
+      if (String(allArticles[i].id) === String(state.id)) {
+        // 直接显示文章，不再 pushState
+        document.getElementById('homePage').classList.remove('active');
+        document.getElementById('articleDetailPage').classList.add('active');
+        document.getElementById('searchWrap').style.display = 'none';
+        showArticle(allArticles[i]);
+        return;
+      }
+    }
+  }
+  // 回到首页
+  document.getElementById('homePage').classList.add('active');
+  document.getElementById('articleDetailPage').classList.remove('active');
+  document.getElementById('searchWrap').style.display = '';
+  document.title = window._siteTitle || '百倍机会攻略';
+  window.scrollTo(0,0);
+});
 
 document.getElementById('searchInput').addEventListener('input', function() {
   var q = this.value.trim().toLowerCase();
@@ -759,7 +779,7 @@ function showHome() {
   document.getElementById('homePage').classList.add('active');
   document.getElementById('articleDetailPage').classList.remove('active');
   document.getElementById('searchWrap').style.display = '';
-  try { history.replaceState(null,'','#'); } catch(e) {}
+  try { history.pushState({page:'home'},document.title,'#'); } catch(e) {}
   window.scrollTo(0,0);
   document.title = '百倍机会攻略';
 }
@@ -839,7 +859,7 @@ function showArticle(art) {
     })(navCards[k]);
   }
 
-  try { history.replaceState(null,'','#article-'+art.id); } catch(e) {}
+  try { history.pushState({page:'article',id:String(art.id)},art.title,'#article-'+art.id); } catch(e) {}
   window.scrollTo(0, 0);
   document.title = art.title+' — 百倍机会攻略';
 }
