@@ -193,7 +193,8 @@ body { font-family: 'Noto Sans SC', -apple-system, sans-serif; background: var(-
 .editor-toolbar {
   background:var(--sf); border:1px solid var(--bd); border-radius:var(--rs);
   padding:8px 12px; display:flex; gap:2px; flex-wrap:wrap; align-items:center;
-  position:sticky; top:0; z-index:10;
+  position:sticky; top:65px; z-index:40;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
 }
 .tb-btn {
   width:32px; height:32px; display:flex; align-items:center; justify-content:center;
@@ -502,6 +503,9 @@ body { font-family: 'Noto Sans SC', -apple-system, sans-serif; background: var(-
               <button class="tb-btn" title="撤销" onclick="document.execCommand('undo')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg>
               </button>
+              <button class="tb-btn" title="清除格式" onclick="clearFormat()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/><line x1="2" y1="2" x2="22" y2="22" stroke-width="1.5"/></svg>
+              </button>
             </div>
             <div class="rich-editor" id="richEditor" contenteditable="true" data-placeholder="开始写文章内容…支持图片、视频、引用等富文本格式"></div>
           </div>
@@ -761,7 +765,7 @@ function renderList() {
 
 /* ── EDITOR ── */
 function newArticle() {
-  editingId = null; tags = [];
+  editingId = null; tags = ['原创'];
   document.getElementById('editorTitle').textContent = '新建文章';
   document.getElementById('editTitle').value = '';
   document.getElementById('editDate').value = new Date().toISOString().slice(0,10);
@@ -963,6 +967,28 @@ function clearCover() {
 }
 
 /* ── TOOLBAR ── */
+function clearFormat() {
+  // 清除所选文字的所有内联格式，恢复为默认段落样式
+  document.getElementById('richEditor').focus();
+  document.execCommand('removeFormat');
+  // 把选中的块级元素（h2/h3/blockquote）换回 p
+  var sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return;
+  var range = sel.getRangeAt(0);
+  var ancestor = range.commonAncestorContainer;
+  if (ancestor.nodeType === 3) ancestor = ancestor.parentNode;
+  // 找到编辑器内所有被选中的块级元素
+  var editor = document.getElementById('richEditor');
+  var blocks = editor.querySelectorAll('h2, h3, h4, blockquote');
+  blocks.forEach(function(el) {
+    if (sel.containsNode(el, true)) {
+      var p = document.createElement('p');
+      p.innerHTML = el.innerHTML;
+      el.parentNode.replaceChild(p, el);
+    }
+  });
+}
+
 function fmt(cmd) {
   var editor = document.getElementById('richEditor');
   editor.focus();
