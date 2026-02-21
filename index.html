@@ -284,23 +284,20 @@ nav {
 .detail-outer { max-width: var(--col); margin: 0 auto; padding: 0 32px 100px; }
 
 .back-btn {
-  display: inline-flex; align-items: center; gap: 6px;
+  display: inline-flex; align-items: center; gap: 7px;
   margin: 0 0 28px;
-  padding: 0;
-  font-size: 12px; font-weight: 500; color: var(--t3);
-  background: none; border: none;
-  cursor: pointer;
-  transition: color .15s, gap .15s;
-  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 7px 12px 7px 9px;
+  font-size: 12px; font-weight: 500; color: var(--t2);
+  background: var(--bg2); border: 1px solid var(--line);
+  border-radius: 6px; cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+  letter-spacing: 0.02em;
   position: sticky; top: 64px; z-index: 100;
+  backdrop-filter: blur(8px);
+  background: rgba(244,239,230,0.92);
 }
-.back-btn:hover { color: var(--t1); gap: 4px; }
-.back-btn:hover .back-arrow { transform: translateX(-3px); }
-.back-arrow {
-  display: inline-flex; align-items: center;
-  transition: transform .2s var(--ease);
-}
-.back-arrow svg { width: 13px; height: 13px; }
+.back-btn:hover { background: var(--bg3); border-color: var(--t3); color: var(--t1); }
+.back-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
 
 .detail-cover {
   width: 100%; aspect-ratio: 2.35 / 1;
@@ -516,11 +513,9 @@ footer {
 <div class="page" id="articleDetailPage">
   <div class="detail-outer">
     <button class="back-btn" onclick="showHome()">
-      <span class="back-arrow">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M19 12H5M5 12l7-7M5 12l7 7"/>
-        </svg>
-      </span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M5 12l7-7M5 12l7 7"/>
+      </svg>
       所有文章
     </button>
     <div id="articleContent"></div>
