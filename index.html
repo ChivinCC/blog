@@ -6,9 +6,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://pmazexeasryqogyfjhbi.supabase.co">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500&display=swap"></noscript>
 <title>百倍机会攻略</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap');
+/* 字体通过 <link> 非阻塞加载，见 <head> */
 
 /* ─── 设计系统 ───────────────────────────────────────
    调色板：胡粉系暖米，参考日本传统纸本印刷质感
@@ -25,7 +27,7 @@
   --t3:       #9E9890;   /* 辅文：浅暖灰 */
   --tag-bg:   #E2DDD3;
   --tag-t:    #6A6560;
-  --serif:    'Noto Serif SC', Georgia, serif;
+  --serif:    'ZCOOL XiaoWei', 'Noto Serif SC', Georgia, serif;
   --sans:     'Noto Sans SC', -apple-system, sans-serif;
   --ease:     cubic-bezier(.4,0,.2,1);
   --max:      900px;
@@ -195,7 +197,7 @@ nav {
 }
 .row-title {
   font-family: var(--serif);
-  font-size: clamp(14px, 1.8vw, 16px);
+  font-size: clamp(16px, 1.8vw, 18px);
   font-weight: 600; line-height: 1.45;
   color: var(--t1); margin-bottom: 6px;
   display: -webkit-box; -webkit-line-clamp: 2;
@@ -544,7 +546,7 @@ function sbFetch(path, opts) {
 }
 
 var CACHE_KEY = 'baibei_cache_v2';
-var CACHE_TTL = 5 * 60 * 1000; // 5分钟缓存
+var CACHE_TTL = 30 * 60 * 1000; // 30分钟缓存
 
 function loadCache() {
   try {
@@ -959,6 +961,13 @@ var DEMO = [
 ];
 
 init();
+
+// 注册 Service Worker（离线缓存，二次访问秒开）
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').catch(function(){});
+  });
+}
 </script>
 </body>
 </html>
