@@ -523,7 +523,7 @@ footer {
   </div>
 </div>
 
-<footer>© 2024 百倍机会攻略 · 每天一篇，持续更新</footer>
+<footer id="siteFooter">© 2024 百倍机会攻略 · 每天一篇，持续更新</footer>
 
 <script>
 var SUPABASE_URL = 'https://pmazexeasryqogyfjhbi.supabase.co';
@@ -579,6 +579,11 @@ function init() {
       // 日更计数模板存起来供 calcDays 使用
       if (s.siteCountTpl) window._countTpl = s.siteCountTpl;
 
+      // 页脚文字
+      if (s.siteFooter) {
+        var ft = document.getElementById('siteFooter');
+        if (ft) ft.textContent = s.siteFooter;
+      }
       // 二维码图片
       if (s.qrUrl) {
         var h = document.getElementById('qrHolder');

@@ -561,7 +561,20 @@ body { font-family: 'Noto Sans SC', -apple-system, sans-serif; background: var(-
             <div class="settings-row"><label>主标题（header 大标题）</label><input type="text" class="settings-input" id="setSiteSlogan" placeholder="发现值得你认真对待的机会"></div>
             <div class="settings-row"><label>日更计数文案（{n} 代表篇数）</label><input type="text" class="settings-input" id="setSiteCountTpl" placeholder="已持续日更 {n} 天"></div>
             <div class="settings-row"><label>二维码说明文字</label><input type="text" class="settings-input" id="setSiteQrLabel" placeholder="扫码关注公众号"></div>
-            <div class="settings-row"><label>公众号二维码图片 URL</label><input type="text" class="settings-input" id="setQrUrl" placeholder="https://…"></div>
+            <div class="settings-row">
+              <label>公众号二维码图片</label>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+                <div id="qrPreview" style="width:72px;height:72px;border:1px solid var(--bd);border-radius:6px;overflow:hidden;background:var(--sf2);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;" onclick="document.getElementById('qrFileInput').click()">
+                  <span style="font-size:22px;">🖼</span>
+                </div>
+                <div style="flex:1;">
+                  <button class="btn btn-ghost" style="width:100%;margin-bottom:6px;" onclick="document.getElementById('qrFileInput').click()">上传二维码图片</button>
+                  <div id="qrFileName" style="font-size:11px;color:var(--t3);">未上传</div>
+                </div>
+              </div>
+              <input type="file" id="qrFileInput" accept="image/*" style="display:none" onchange="uploadQrImage(this)">
+              <input type="hidden" id="setQrUrl">
+            </div>
           </div>
           <div class="settings-card">
             <h3>修改后台密码</h3>
@@ -569,6 +582,10 @@ body { font-family: 'Noto Sans SC', -apple-system, sans-serif; background: var(-
             <div class="settings-row"><label>新密码</label><input type="password" class="settings-input" id="setPwdNew" placeholder="新密码（至少6位）"></div>
             <div class="settings-row"><label>确认新密码</label><input type="password" class="settings-input" id="setPwdConfirm" placeholder="再次输入新密码"></div>
             <button class="btn btn-ghost" onclick="changePassword()" style="margin-top:4px">更新密码</button>
+          </div>
+          <div class="settings-card">
+            <h3>页脚文字</h3>
+            <div class="settings-row"><label>页脚版权文字</label><input type="text" class="settings-input" id="setSiteFooter" placeholder="© 2024 百倍机会攻略 · 每天一篇，持续更新"></div>
           </div>
           <div class="settings-card danger-card">
             <h3>数据备份</h3>
@@ -867,6 +884,30 @@ function updateCoverPrev(url) {
   }
 }
 
+function uploadQrImage(input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 3 * 1024 * 1024) { toast('图片不能超过 3MB','err'); return; }
+  var ext = file.name.split('.').pop().toLowerCase();
+  var fileName = 'qr_' + Date.now() + '.' + ext;
+  document.getElementById('qrFileName').textContent = '上传中…';
+  fetch(SUPABASE_URL + '/storage/v1/object/covers/' + fileName, {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': file.type, 'x-upsert': 'true' },
+    body: file
+  }).then(function(r) {
+    if (!r.ok) throw new Error(r.status);
+    var url = SUPABASE_URL + '/storage/v1/object/public/covers/' + fileName;
+    document.getElementById('setQrUrl').value = url;
+    document.getElementById('qrPreview').innerHTML = '<img src="'+url+'" style="width:100%;height:100%;object-fit:cover;">';
+    document.getElementById('qrFileName').textContent = file.name;
+    toast('二维码上传成功','ok');
+  }).catch(function() {
+    document.getElementById('qrFileName').textContent = '上传失败，请重试';
+    toast('上传失败','err');
+  });
+}
+
 function uploadCoverFile(input) {
   var file = input.files[0];
   if (!file) return;
@@ -1049,13 +1090,19 @@ function fillSettings() {
   document.getElementById('setSiteSlogan').value   = settings.siteSlogan   || '发现值得你认真对待的机会';
   document.getElementById('setSiteCountTpl').value = settings.siteCountTpl || '已持续日更 {n} 天';
   document.getElementById('setSiteQrLabel').value  = settings.siteQrLabel  || '扫码关注公众号';
+  document.getElementById('setSiteFooter').value   = settings.siteFooter   || '© 2024 百倍机会攻略 · 每天一篇，持续更新';
   document.getElementById('setQrUrl').value        = settings.qrUrl        || '';
+  if (settings.qrUrl) {
+    document.getElementById('qrPreview').innerHTML = '<img src="'+settings.qrUrl+'" style="width:100%;height:100%;object-fit:cover;">';
+    document.getElementById('qrFileName').textContent = '已上传';
+  }
 }
 function saveSettings() {
   settings.siteName     = document.getElementById('setSiteName').value.trim();
   settings.siteSlogan   = document.getElementById('setSiteSlogan').value.trim();
   settings.siteCountTpl = document.getElementById('setSiteCountTpl').value.trim();
   settings.siteQrLabel  = document.getElementById('setSiteQrLabel').value.trim();
+  settings.siteFooter   = document.getElementById('setSiteFooter').value.trim();
   settings.qrUrl        = document.getElementById('setQrUrl').value.trim();
 
   var upserts = Object.keys(settings).map(function(k) {
