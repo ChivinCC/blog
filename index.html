@@ -6,8 +6,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://pmazexeasryqogyfjhbi.supabase.co">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500&display=swap"></noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500&display=swap"></noscript>
 <title>百倍机会攻略</title>
 <style>
 /* 字体通过 <link> 非阻塞加载，见 <head> */
@@ -27,7 +27,7 @@
   --t3:       #9E9890;   /* 辅文：浅暖灰 */
   --tag-bg:   #E2DDD3;
   --tag-t:    #6A6560;
-  --serif:    'ZCOOL XiaoWei', 'Noto Serif SC', Georgia, serif;
+  --serif:    'Noto Serif SC', Georgia, serif;
   --sans:     'Noto Sans SC', -apple-system, sans-serif;
   --ease:     cubic-bezier(.4,0,.2,1);
   --max:      900px;
@@ -107,7 +107,7 @@ nav {
 }
 .header-title {
   font-family: var(--serif);
-  font-size: clamp(20px, 3vw, 26px);
+  font-size: clamp(22px, 3vw, 28px);
   font-weight: 600; line-height: 1.2;
   color: var(--t1); letter-spacing: -0.01em;
 }
@@ -197,7 +197,7 @@ nav {
 }
 .row-title {
   font-family: var(--serif);
-  font-size: clamp(16px, 1.8vw, 18px);
+  font-size: clamp(17px, 1.8vw, 19px);
   font-weight: 600; line-height: 1.45;
   color: var(--t1); margin-bottom: 6px;
   display: -webkit-box; -webkit-line-clamp: 2;
@@ -435,7 +435,7 @@ footer {
   .header-qr { padding-bottom: 0; }
   .header-qr-img { width: 52px; height: 52px; }
   .header-qr-label { font-size: 9px; }
-  .header-title { font-size: 17px; }
+  .header-title { font-size: 18px; }
 
   /* Article rows: stack on mobile */
   .article-row {
@@ -446,7 +446,7 @@ footer {
   }
   .article-row:hover { margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
   .row-thumb { width: 100%; }
-  .row-title { font-size: 15px; }
+  .row-title { font-size: 16px; }
   .row-summary { font-size: 12px; }
   .row-arrow { display: none; }
 
@@ -460,8 +460,8 @@ footer {
 
 /* Small phones (<400px) */
 @media (max-width: 400px) {
-  .header-title { font-size: 16px; }
-  .row-title { font-size: 14px; }
+  .header-title { font-size: 17px; }
+  .row-title { font-size: 15px; }
   .detail-title { font-size: 18px; }
 }
 </style>
@@ -734,8 +734,11 @@ function renderPage() {
   var rows = el.querySelectorAll('.article-row');
   for (var i = 0; i < rows.length; i++) {
     (function(row) {
+      var id = row.getAttribute('data-id');
+      // 悬停/触摸开始时预加载正文
+      row.addEventListener('mouseover', function() { prefetchArticle(id); });
+      row.addEventListener('touchstart', function() { prefetchArticle(id); }, {passive:true});
       row.addEventListener('click', function() {
-        var id = row.getAttribute('data-id');
         for (var j = 0; j < allArticles.length; j++) {
           if (String(allArticles[j].id) === id) { showArticle(allArticles[j]); return; }
         }
@@ -820,30 +823,67 @@ function showHome() {
   document.title = '百倍机会攻略';
 }
 
+// 预加载正文（悬停/触摸时触发）
+var prefetchTimer = null;
+function prefetchArticle(id) {
+  // 已有内容不重复拉
+  for (var i = 0; i < allArticles.length; i++) {
+    if (String(allArticles[i].id) === String(id)) {
+      if (allArticles[i].content) return;
+      var art = allArticles[i];
+      art._fetching = true;
+      sbFetch('articles?select=content&id=eq.' + String(id))
+        .then(function(r){ return r.json(); })
+        .then(function(rows){
+          if (rows && rows[0]) art.content = rows[0].content || '';
+          art._fetching = false;
+        })
+        .catch(function(){ art._fetching = false; });
+      return;
+    }
+  }
+}
+
 function showArticle(art) {
   document.getElementById('homePage').classList.remove('active');
   document.getElementById('articleDetailPage').classList.add('active');
   document.getElementById('searchWrap').style.display = 'none';
 
-  // 正文按需加载
-  if (!art.content) {
-    document.getElementById('articleContent').innerHTML =
-      '<div class="list-state"><div class="spinner"></div>正在加载…</div>';
-    try { history.pushState({page:'article',id:String(art.id)},art.title,'#article-'+art.id); } catch(e) {}
-    document.title = art.title + ' — ' + (window._siteTitle || '百倍机会攻略');
-    sbFetch('articles?select=content&id=eq.' + String(art.id))
-      .then(function(r){ return r.json(); })
-      .then(function(rows){
-        if (rows && rows[0]) {
-          art.content = rows[0].content || '';
-          // 同步更新缓存里的 content
-        }
-        renderArticleDetail(art);
-      })
-      .catch(function(){ renderArticleDetail(art); });
+  try { history.pushState({page:'article',id:String(art.id)},art.title,'#article-'+art.id); } catch(e) {}
+  document.title = art.title + ' — ' + (window._siteTitle || '百倍机会攻略');
+
+  // 正文已预加载好，直接渲染
+  if (art.content) {
+    renderArticleDetail(art);
     return;
   }
-  renderArticleDetail(art);
+
+  // 正在预拉中，轮询等待（最多等 800ms，之后兜底拉一次）
+  if (art._fetching) {
+    document.getElementById('articleContent').innerHTML =
+      '<div class="list-state"><div class="spinner"></div>正在加载…</div>';
+    var waited = 0;
+    var poll = setInterval(function() {
+      waited += 50;
+      if (art.content) { clearInterval(poll); renderArticleDetail(art); return; }
+      if (waited >= 800) {
+        clearInterval(poll);
+        renderArticleDetail(art); // 超时也渲染，content 可能还是空
+      }
+    }, 50);
+    return;
+  }
+
+  // 没有预拉过，直接请求
+  document.getElementById('articleContent').innerHTML =
+    '<div class="list-state"><div class="spinner"></div>正在加载…</div>';
+  sbFetch('articles?select=content&id=eq.' + String(art.id))
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if (rows && rows[0]) art.content = rows[0].content || '';
+      renderArticleDetail(art);
+    })
+    .catch(function(){ renderArticleDetail(art); });
 }
 
 function renderArticleDetail(art) {
