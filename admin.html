@@ -152,9 +152,19 @@ body { font-family: 'Noto Sans SC', -apple-system, sans-serif; background: var(-
   font-size:11px; color:var(--t3); text-transform:uppercase; letter-spacing:.06em;
 }
 .trow {
-  display:grid; grid-template-columns:1fr 130px 90px 110px;
-  padding:14px 20px; border-bottom:1px solid var(--bd);
+  display:grid; grid-template-columns:56px 1fr 130px 90px 110px;
+  padding:12px 20px; border-bottom:1px solid var(--bd);
   align-items:center; gap:12px; transition:background .15s;
+}
+.trow-cover {
+  width:56px; height:36px; border-radius:4px;
+  overflow:hidden; background:var(--sf2); flex-shrink:0;
+  border:1px solid var(--bd);
+}
+.trow-cover img { width:100%; height:100%; object-fit:cover; display:block; }
+.trow-cover-ph {
+  width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+  color:var(--t3); font-size:16px;
 }
 .trow:last-child { border-bottom:none; }
 .trow:hover { background:var(--sf2); }
@@ -306,6 +316,7 @@ body { font-family: 'Noto Sans SC', -apple-system, sans-serif; background: var(-
   .editor-sidebar { order:-1; }
   .table-head { grid-template-columns:1fr 90px; }
   .trow { grid-template-columns:1fr 90px; }
+  .trow > *:nth-child(1) { display:none; } /* 移动端隐藏封面 */
   .table-head > *:nth-child(2), .table-head > *:nth-child(3),
   .trow > *:nth-child(2), .trow > *:nth-child(3) { display:none; }
   .topbar { padding:16px 20px; }
@@ -613,12 +624,14 @@ var AUTH_KEY    = 'baibei_admin_auth';
 var DEFAULT_PWD = 'czf330881812';
 var SUPABASE_URL = 'https://pmazexeasryqogyfjhbi.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_JJVVoK8dMkmjAIaklWx4dA_FOTP_7hV';
+var ADMIN_TOKEN = 'a8Kz3!mN6qW#pL2xV9@j';
 
 function sbFetch(path, opts) {
   return fetch(SUPABASE_URL + '/rest/v1/' + path, Object.assign({
     headers: {
       'apikey': SUPABASE_KEY,
       'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'x-admin-token': ADMIN_TOKEN,
       'Content-Type': 'application/json',
       'Prefer': 'return=representation'
     }
@@ -747,7 +760,11 @@ function renderList() {
   }
   el.innerHTML = sorted.map(function(a) {
     var tagHtml = (a.tags||[]).slice(0,2).map(function(t){ return '<span class="tag-pill">'+esc(t)+'</span>'; }).join(' ');
+    var coverHtml = a.cover
+      ? '<div class="trow-cover"><img src="'+esc(a.cover)+'" loading="lazy" alt=""></div>'
+      : '<div class="trow-cover"><div class="trow-cover-ph">🖼</div></div>';
     return '<div class="trow">' +
+      coverHtml +
       '<div><div class="trow-title">'+esc(a.title||'（无标题）')+'</div><div class="trow-summary">'+esc(a.summary||'')+'</div></div>' +
       '<div class="trow-date">'+fmtDate(a.date)+'</div>' +
       '<div>'+tagHtml+'</div>' +
@@ -804,7 +821,11 @@ function saveArticle() {
   if (!title) { toast('请填写文章标题','err'); return; }
   if (!date)  { toast('请选择发布日期','err'); return; }
 
-  var payload = { title:title, date:date, summary:summary, cover:cover, tags:tags.slice(), content:body };
+  // 确保"原创"标签如果存在则排在第一位
+  var sortedTags = tags.slice();
+  var origIdx = sortedTags.indexOf('原创');
+  if (origIdx > 0) { sortedTags.splice(origIdx, 1); sortedTags.unshift('原创'); }
+  var payload = { title:title, date:date, summary:summary, cover:cover, tags:sortedTags, content:body };
 
   if (editingId !== null) {
     sbFetch('articles?id=eq.' + String(editingId), {
@@ -898,7 +919,7 @@ function uploadQrImage(input) {
   document.getElementById('qrFileName').textContent = '上传中…';
   fetch(SUPABASE_URL + '/storage/v1/object/covers/' + fileName, {
     method: 'POST',
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': file.type, 'x-upsert': 'true' },
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': file.type, 'x-upsert': 'true', 'x-admin-token': ADMIN_TOKEN },
     body: file
   }).then(function(r) {
     if (!r.ok) throw new Error(r.status);
@@ -931,6 +952,7 @@ function uploadCoverFile(input) {
     headers: {
       'apikey': SUPABASE_KEY,
       'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'x-admin-token': ADMIN_TOKEN,
       'Content-Type': file.type,
       'x-upsert': 'true'
     },
@@ -1045,6 +1067,7 @@ function uploadBodyImage(input) {
     headers: {
       'apikey': SUPABASE_KEY,
       'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'x-admin-token': ADMIN_TOKEN,
       'Content-Type': file.type,
       'x-upsert': 'true'
     },
