@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://pmazexeasryqogyfjhbi.supabase.co">
 <title>百倍机会攻略</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap');
@@ -540,69 +543,100 @@ function sbFetch(path, opts) {
   }, opts || {}));
 }
 
-function init() {
-  document.getElementById('articleList').innerHTML =
-    '<div class="list-state"><div class="spinner"></div>正在加载…</div>';
+var CACHE_KEY = 'baibei_cache_v2';
+var CACHE_TTL = 5 * 60 * 1000; // 5分钟缓存
 
+function loadCache() {
+  try {
+    var raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    var c = JSON.parse(raw);
+    if (Date.now() - c.ts > CACHE_TTL) return null;
+    return c;
+  } catch(e) { return null; }
+}
+
+function saveCache(arts, sets) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), arts: arts, sets: sets }));
+  } catch(e) {}
+}
+
+function applyData(arts, sets) {
+  allArticles = (Array.isArray(arts) && arts.length > 0) ? arts : DEMO;
+
+  if (Array.isArray(sets)) {
+    var s = {};
+    sets.forEach(function(row){ s[row.key] = row.value; });
+    if (s.siteName) {
+      var ey = document.querySelector('.header-eyebrow');
+      if (ey) ey.textContent = s.siteName;
+      var br = document.querySelector('.brand-name');
+      if (br) br.textContent = s.siteName;
+      document.title = s.siteName;
+    }
+    if (s.siteSlogan) {
+      var ht = document.querySelector('.header-title');
+      if (ht) ht.textContent = s.siteSlogan;
+    }
+    if (s.siteQrLabel) {
+      var ql = document.querySelector('.header-qr-label');
+      if (ql) ql.innerHTML = s.siteQrLabel;
+    }
+    if (s.siteCountTpl) window._countTpl = s.siteCountTpl;
+    if (s.siteFooter) {
+      var ft = document.getElementById('siteFooter');
+      if (ft) ft.textContent = s.siteFooter;
+    }
+    if (s.qrUrl) {
+      var h = document.getElementById('qrHolder');
+      if (h) {
+        h.innerHTML = '';
+        var img = document.createElement('img');
+        img.src = s.qrUrl; img.alt = 'QR';
+        h.appendChild(img);
+      }
+    }
+  }
+
+  filtered = allArticles.slice();
+  renderList(filtered);
+  handleRoute();
+}
+
+function init() {
+  // 先用缓存极速渲染
+  var cache = loadCache();
+  if (cache) {
+    applyData(cache.arts, cache.sets);
+  } else {
+    document.getElementById('articleList').innerHTML =
+      '<div class="list-state"><div class="spinner"></div>正在加载…</div>';
+  }
+
+  // 后台静默刷新（不阻塞渲染）
   Promise.all([
-    sbFetch('articles?select=*&order=date.desc,id.desc').then(function(r) { return r.json(); }),
+    sbFetch('articles?select=id,title,summary,cover,tags,date&order=date.desc,id.desc').then(function(r) { return r.json(); }),
     sbFetch('settings?select=*').then(function(r) { return r.json(); })
   ]).then(function(results) {
     var arts = results[0];
     var sets = results[1];
-
-    allArticles = (Array.isArray(arts) && arts.length > 0) ? arts : DEMO;
-
-    if (Array.isArray(sets)) {
-      var s = {};
-      sets.forEach(function(row){ s[row.key] = row.value; });
-
-      // 眉标题
-      if (s.siteName) {
-        var ey = document.querySelector('.header-eyebrow');
-        if (ey) ey.textContent = s.siteName;
-        var br = document.querySelector('.brand-name');
-        if (br) br.textContent = s.siteName;
-        document.title = s.siteName;
-      }
-      // 主标题 slogan
-      if (s.siteSlogan) {
-        var ht = document.querySelector('.header-title');
-        if (ht) ht.textContent = s.siteSlogan;
-      }
-      // 二维码说明文字
-      if (s.siteQrLabel) {
-        var ql = document.querySelector('.header-qr-label');
-        if (ql) ql.innerHTML = s.siteQrLabel;
-      }
-      // 日更计数模板存起来供 calcDays 使用
-      if (s.siteCountTpl) window._countTpl = s.siteCountTpl;
-
-      // 页脚文字
-      if (s.siteFooter) {
-        var ft = document.getElementById('siteFooter');
-        if (ft) ft.textContent = s.siteFooter;
-      }
-      // 二维码图片
-      if (s.qrUrl) {
-        var h = document.getElementById('qrHolder');
-        if (h) {
-          h.innerHTML = '';
-          var img = document.createElement('img');
-          img.src = s.qrUrl; img.alt = 'QR';
-          h.appendChild(img);
-        }
-      }
+    saveCache(arts, sets);
+    // 静默更新：重新渲染列表（不影响正在浏览的文章详情）
+    var onDetail = document.getElementById('articleDetailPage').classList.contains('active');
+    applyData(arts, sets);
+    if (onDetail) {
+      // 用户正在看文章，不跳回列表
+      document.getElementById('articleDetailPage').classList.add('active');
+      document.getElementById('homePage').classList.remove('active');
     }
-
-    filtered = allArticles.slice();
-    renderList(filtered);
-    handleRoute();
   }).catch(function() {
-    allArticles = DEMO;
-    filtered = allArticles.slice();
-    renderList(filtered);
-    handleRoute();
+    if (!cache) {
+      allArticles = DEMO;
+      filtered = allArticles.slice();
+      renderList(filtered);
+      handleRoute();
+    }
   });
 }
 
@@ -789,6 +823,28 @@ function showArticle(art) {
   document.getElementById('articleDetailPage').classList.add('active');
   document.getElementById('searchWrap').style.display = 'none';
 
+  // 正文按需加载
+  if (!art.content) {
+    document.getElementById('articleContent').innerHTML =
+      '<div class="list-state"><div class="spinner"></div>正在加载…</div>';
+    try { history.pushState({page:'article',id:String(art.id)},art.title,'#article-'+art.id); } catch(e) {}
+    document.title = art.title + ' — ' + (window._siteTitle || '百倍机会攻略');
+    sbFetch('articles?select=content&id=eq.' + String(art.id))
+      .then(function(r){ return r.json(); })
+      .then(function(rows){
+        if (rows && rows[0]) {
+          art.content = rows[0].content || '';
+          // 同步更新缓存里的 content
+        }
+        renderArticleDetail(art);
+      })
+      .catch(function(){ renderArticleDetail(art); });
+    return;
+  }
+  renderArticleDetail(art);
+}
+
+function renderArticleDetail(art) {
   var tags = (art.tags||[]).map(function(t){
     return '<span class="detail-tag">'+esc(t)+'</span>';
   }).join('');
@@ -861,7 +917,7 @@ function showArticle(art) {
 
   try { history.pushState({page:'article',id:String(art.id)},art.title,'#article-'+art.id); } catch(e) {}
   window.scrollTo(0, 0);
-  document.title = art.title+' — 百倍机会攻略';
+  document.title = art.title + ' — ' + (window._siteTitle || '百倍机会攻略');
 }
 
 function renderContent(html) {
