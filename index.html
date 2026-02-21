@@ -555,17 +555,40 @@ function init() {
     allArticles = (Array.isArray(arts) && arts.length > 0) ? arts : DEMO;
 
     if (Array.isArray(sets)) {
-      sets.forEach(function(row) {
-        if (row.key === 'qrUrl' && row.value) {
-          var h = document.getElementById('qrHolder');
-          if (h) {
-            h.innerHTML = '';
-            var img = document.createElement('img');
-            img.src = row.value; img.alt = 'QR';
-            h.appendChild(img);
-          }
+      var s = {};
+      sets.forEach(function(row){ s[row.key] = row.value; });
+
+      // 眉标题
+      if (s.siteName) {
+        var ey = document.querySelector('.header-eyebrow');
+        if (ey) ey.textContent = s.siteName;
+        var br = document.querySelector('.brand-name');
+        if (br) br.textContent = s.siteName;
+        document.title = s.siteName;
+      }
+      // 主标题 slogan
+      if (s.siteSlogan) {
+        var ht = document.querySelector('.header-title');
+        if (ht) ht.textContent = s.siteSlogan;
+      }
+      // 二维码说明文字
+      if (s.siteQrLabel) {
+        var ql = document.querySelector('.header-qr-label');
+        if (ql) ql.innerHTML = s.siteQrLabel;
+      }
+      // 日更计数模板存起来供 calcDays 使用
+      if (s.siteCountTpl) window._countTpl = s.siteCountTpl;
+
+      // 二维码图片
+      if (s.qrUrl) {
+        var h = document.getElementById('qrHolder');
+        if (h) {
+          h.innerHTML = '';
+          var img = document.createElement('img');
+          img.src = s.qrUrl; img.alt = 'QR';
+          h.appendChild(img);
         }
-      });
+      }
     }
 
     filtered = allArticles.slice();
@@ -580,7 +603,6 @@ function init() {
 }
 
 function calcDays() {
-  /* 用文章总数作为"日更天数"，与用户要求吻合：x = 篇数 */
   return allArticles.length;
 }
 
@@ -630,7 +652,8 @@ function renderPage() {
   if (q) {
     rc.textContent = '找到 ' + currentList.length + ' 篇相关文章';
   } else {
-    rc.textContent = '已持续日更 ' + calcDays() + ' 天';
+    var tpl = window._countTpl || '已持续日更 {n} 天';
+    rc.textContent = tpl.replace('{n}', calcDays());
   }
 
   if (!currentList.length) {

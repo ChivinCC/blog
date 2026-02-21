@@ -557,8 +557,10 @@ body { font-family: 'Noto Sans SC', -apple-system, sans-serif; background: var(-
         <div class="settings-wrap">
           <div class="settings-card">
             <h3>基本信息</h3>
-            <div class="settings-row"><label>站点名称</label><input type="text" class="settings-input" id="setSiteName" value="百倍机会攻略"></div>
-            <div class="settings-row"><label>站点副标题</label><input type="text" class="settings-input" id="setSiteDesc" value="发现百倍机会"></div>
+            <div class="settings-row"><label>眉标题（导航栏 & header 左上小字）</label><input type="text" class="settings-input" id="setSiteName" placeholder="百倍机会攻略"></div>
+            <div class="settings-row"><label>主标题（header 大标题）</label><input type="text" class="settings-input" id="setSiteSlogan" placeholder="发现值得你认真对待的机会"></div>
+            <div class="settings-row"><label>日更计数文案（{n} 代表篇数）</label><input type="text" class="settings-input" id="setSiteCountTpl" placeholder="已持续日更 {n} 天"></div>
+            <div class="settings-row"><label>二维码说明文字</label><input type="text" class="settings-input" id="setSiteQrLabel" placeholder="扫码关注公众号"></div>
             <div class="settings-row"><label>公众号二维码图片 URL</label><input type="text" class="settings-input" id="setQrUrl" placeholder="https://…"></div>
           </div>
           <div class="settings-card">
@@ -611,19 +613,23 @@ document.getElementById('pwdInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') doLogin();
 });
 
+function enterAdmin() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminApp').style.display = 'block';
+  sessionStorage.setItem('baibei_authed', '1');
+  adminInit();
+}
+
 function doLogin() {
   var val = document.getElementById('pwdInput').value;
-  // 先从 Supabase 取最新密码，保证跨设备一致
   sbFetch('settings?key=eq.adminPwd&select=value')
     .then(function(r) { return r.json(); })
     .then(function(rows) {
       var cloudPwd = (rows && rows[0]) ? rows[0].value : null;
       var stored = cloudPwd || localStorage.getItem(AUTH_KEY) || DEFAULT_PWD;
-      if (cloudPwd) localStorage.setItem(AUTH_KEY, cloudPwd); // 本地同步
+      if (cloudPwd) localStorage.setItem(AUTH_KEY, cloudPwd);
       if (val === stored) {
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('adminApp').style.display = 'block';
-        adminInit();
+        enterAdmin();
       } else {
         document.getElementById('loginErr').textContent = '密码错误，请重试';
         document.getElementById('pwdInput').value = '';
@@ -632,12 +638,9 @@ function doLogin() {
       }
     })
     .catch(function() {
-      // 网络失败降级到本地密码
       var stored = localStorage.getItem(AUTH_KEY) || DEFAULT_PWD;
       if (val === stored) {
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('adminApp').style.display = 'block';
-        adminInit();
+        enterAdmin();
       } else {
         document.getElementById('loginErr').textContent = '密码错误，请重试';
         document.getElementById('pwdInput').value = '';
@@ -647,7 +650,20 @@ function doLogin() {
     });
 }
 
-function doLogout() { location.reload(); }
+function doLogout() {
+  sessionStorage.removeItem('baibei_authed');
+  location.reload();
+}
+
+// 刷新免登录：session 内已登录则直接进入
+(function(){
+  if (sessionStorage.getItem('baibei_authed') === '1') {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display = 'block';
+    // adminInit 会在 DOMContentLoaded 后由正常流程调用，这里直接调用
+    window.addEventListener('DOMContentLoaded', function(){ adminInit(); });
+  }
+})();
 
 /* ── INIT ── */
 function adminInit() {
@@ -1029,14 +1045,18 @@ function doInsertVideo() {
 
 /* ── SETTINGS ── */
 function fillSettings() {
-  document.getElementById('setSiteName').value = settings.siteName || '百倍机会攻略';
-  document.getElementById('setSiteDesc').value = settings.siteDesc || '发现百倍机会';
-  document.getElementById('setQrUrl').value    = settings.qrUrl    || '';
+  document.getElementById('setSiteName').value     = settings.siteName     || '百倍机会攻略';
+  document.getElementById('setSiteSlogan').value   = settings.siteSlogan   || '发现值得你认真对待的机会';
+  document.getElementById('setSiteCountTpl').value = settings.siteCountTpl || '已持续日更 {n} 天';
+  document.getElementById('setSiteQrLabel').value  = settings.siteQrLabel  || '扫码关注公众号';
+  document.getElementById('setQrUrl').value        = settings.qrUrl        || '';
 }
 function saveSettings() {
-  settings.siteName = document.getElementById('setSiteName').value.trim();
-  settings.siteDesc = document.getElementById('setSiteDesc').value.trim();
-  settings.qrUrl    = document.getElementById('setQrUrl').value.trim();
+  settings.siteName     = document.getElementById('setSiteName').value.trim();
+  settings.siteSlogan   = document.getElementById('setSiteSlogan').value.trim();
+  settings.siteCountTpl = document.getElementById('setSiteCountTpl').value.trim();
+  settings.siteQrLabel  = document.getElementById('setSiteQrLabel').value.trim();
+  settings.qrUrl        = document.getElementById('setQrUrl').value.trim();
 
   var upserts = Object.keys(settings).map(function(k) {
     return sbFetch('settings?key=eq.' + encodeURIComponent(k), {
