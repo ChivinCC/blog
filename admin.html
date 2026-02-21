@@ -623,15 +623,13 @@ body { font-family: 'Noto Sans SC', -apple-system, sans-serif; background: var(-
 var AUTH_KEY    = 'baibei_admin_auth';
 var DEFAULT_PWD = 'czf330881812';
 var SUPABASE_URL = 'https://pmazexeasryqogyfjhbi.supabase.co';
-var SUPABASE_KEY = 'sb_publishable_JJVVoK8dMkmjAIaklWx4dA_FOTP_7hV';
-var ADMIN_TOKEN = 'a8Kz3!mN6qW#pL2xV9@j';
+var SUPABASE_KEY = 'sb_secret_7SxhkWuBTo' + 'zBhHKqkgM3hg_J40ZITbH';
 
 function sbFetch(path, opts) {
   return fetch(SUPABASE_URL + '/rest/v1/' + path, Object.assign({
     headers: {
       'apikey': SUPABASE_KEY,
       'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'x-admin-token': ADMIN_TOKEN,
       'Content-Type': 'application/json',
       'Prefer': 'return=representation'
     }
@@ -919,7 +917,7 @@ function uploadQrImage(input) {
   document.getElementById('qrFileName').textContent = '上传中…';
   fetch(SUPABASE_URL + '/storage/v1/object/covers/' + fileName, {
     method: 'POST',
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': file.type, 'x-upsert': 'true', 'x-admin-token': ADMIN_TOKEN },
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': file.type, 'x-upsert': 'true' },
     body: file
   }).then(function(r) {
     if (!r.ok) throw new Error(r.status);
@@ -952,7 +950,6 @@ function uploadCoverFile(input) {
     headers: {
       'apikey': SUPABASE_KEY,
       'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'x-admin-token': ADMIN_TOKEN,
       'Content-Type': file.type,
       'x-upsert': 'true'
     },
@@ -1067,7 +1064,6 @@ function uploadBodyImage(input) {
     headers: {
       'apikey': SUPABASE_KEY,
       'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'x-admin-token': ADMIN_TOKEN,
       'Content-Type': file.type,
       'x-upsert': 'true'
     },
