@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI投研分析 - 百倍机会攻略</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #f5f0e8;
+    --bg2: #ede8de;
+    --text: #2c2c2c;
+    --text-light: #888;
+    --text-mid: #555;
+    --border: #d8d0c0;
+    --accent: #8b6f47;
+    --accent-light: #c4a882;
+    --green: #4a7c59;
+    --red: #b85450;
+    --card: #faf7f2;
+  }
+
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* 顶部导航 */
+  .nav {
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    height: 52px;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-brand {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav-search {
+    flex: 1;
+    max-width: 480px;
+    height: 32px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0 12px;
+    font-size: 13px;
+    background: var(--bg2);
+    color: var(--text);
+    outline: none;
+  }
+  .nav-search:focus { border-color: var(--accent-light); }
+
+  /* 主体 */
+  .main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+
+  .page-header {
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid var(--text);
+  }
+  .page-label {
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .page-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  .page-desc {
+    font-size: 13px;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  /* 输入区域 */
+  .input-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 28px;
+    margin-bottom: 32px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 200px;
+  }
+  .input-label {
+    font-size: 12px;
+    color: var(--text-mid);
+    letter-spacing: 0.5px;
+  }
+  .input-field {
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 0 14px;
+    font-size: 14px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    font-family: 'Noto Sans SC', sans-serif;
+    transition: border-color 0.2s;
+  }
+  .input-field:focus { border-color: var(--accent); }
+  .input-field::placeholder { color: var(--text-light); }
+
+  .select-field {
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 0 14px;
+    font-size: 14px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+  .select-field:focus { border-color: var(--accent); }
+
+  .btn-analyze {
+    height: 40px;
+    padding: 0 28px;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    border-radius: 2px;
+    font-size: 14px;
+    font-family: 'Noto Sans SC', sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+    letter-spacing: 1px;
+  }
+  .btn-analyze:hover { background: var(--accent); }
+  .btn-analyze:disabled { background: var(--border); cursor: not-allowed; }
+
+  .hint {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+  .hint span { color: var(--accent); }
+
+  /* 状态提示 */
+  .status-bar {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: var(--text-mid);
+  }
+  .status-bar.show { display: flex; }
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .progress-steps {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .step {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--text-light);
+  }
+  .step.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  .step.done {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+
+  /* 结果区域 */
+  .result-section { display: none; }
+  .result-section.show { display: block; }
+
+  .result-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .result-stock-name {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .result-meta {
+    font-size: 12px;
+    color: var(--text-light);
+  }
+
+  .verdict-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    border-radius: 0 2px 2px 0;
+  }
+  .verdict-label {
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .verdict-text {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .signal-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .signal-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 2px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid;
+  }
+  .signal-tag.buy { background: #f0f7f2; border-color: var(--green); color: var(--green); }
+  .signal-tag.sell { background: #fdf0f0; border-color: var(--red); color: var(--red); }
+  .signal-tag.hold { background: #f7f4ee; border-color: var(--accent-light); color: var(--accent); }
+  .signal-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .modules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 600px) { .modules-grid { grid-template-columns: 1fr; } }
+
+  .module-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 18px;
+  }
+  .module-title {
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .module-title::before {
+    content: '';
+    width: 3px;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 1px;
+  }
+  .module-content {
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--text-mid);
+  }
+
+  .full-report {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .full-report-title {
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .full-report-title::before {
+    content: '';
+    width: 3px;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 1px;
+  }
+  .full-report-content {
+    font-size: 14px;
+    line-height: 2;
+    color: var(--text-mid);
+    white-space: pre-wrap;
+  }
+
+  .disclaimer {
+    font-size: 11px;
+    color: var(--text-light);
+    line-height: 1.8;
+    padding: 14px;
+    background: var(--bg2);
+    border-radius: 2px;
+    border: 1px solid var(--border);
+  }
+
+  .error-bar {
+    display: none;
+    padding: 14px 18px;
+    background: #fdf0f0;
+    border: 1px solid #e8c0c0;
+    border-radius: 2px;
+    font-size: 13px;
+    color: var(--red);
+    margin-bottom: 24px;
+  }
+  .error-bar.show { display: block; }
+
+  /* 历史记录 */
+  .history-section {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .history-title {
+    font-size: 12px;
+    color: var(--text-light);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+  .history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    font-size: 13px;
+  }
+  .history-item:hover { border-color: var(--accent-light); }
+  .history-code { font-weight: 500; }
+  .history-date { color: var(--text-light); font-size: 12px; }
+  .history-signal { font-size: 12px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-brand">百倍机会攻略</a>
+  <input class="nav-search" type="text" placeholder="搜索文章标题或正文……">
+</nav>
+
+<main class="main">
+  <div class="page-header">
+    <div class="page-label">工具</div>
+    <h1 class="page-title">AI 多智能体投研分析</h1>
+    <p class="page-desc">由多个 AI 分析师协同完成，涵盖技术面、基本面、市场情绪与新闻舆情，综合输出投资研判。</p>
+  </div>
+
+  <!-- 输入区域 -->
+  <div class="input-section">
+    <div class="input-row">
+      <div class="input-group">
+        <span class="input-label">股票代码 / 名称</span>
+        <input class="input-field" id="stockInput" type="text" placeholder="如 000001 或 AAPL">
+      </div>
+      <div class="input-group" style="max-width:130px">
+        <span class="input-label">市场</span>
+        <select class="select-field" id="marketSelect">
+          <option value="CN">🇨🇳 A股</option>
+          <option value="HK">🇭🇰 港股</option>
+          <option value="US">🇺🇸 美股</option>
+        </select>
+      </div>
+      <div class="input-group" style="max-width:130px">
+        <span class="input-label">分析模式</span>
+        <select class="select-field" id="depthSelect">
+          <option value="quick">快速分析</option>
+          <option value="deep" selected>深度分析</option>
+        </select>
+      </div>
+      <button class="btn-analyze" id="analyzeBtn" onclick="startAnalysis()">开始分析</button>
+    </div>
+    <div class="hint">
+      支持 A股（6位代码）、港股（5位代码）、美股（英文代码）&nbsp;·&nbsp;
+      分析过程约 <span>2-5 分钟</span>，请耐心等待
+    </div>
+  </div>
+
+  <!-- 状态提示 -->
+  <div class="status-bar" id="statusBar">
+    <div class="spinner"></div>
+    <div>
+      <div id="statusText">正在初始化分析任务……</div>
+      <div class="progress-steps" id="progressSteps">
+        <div class="step" id="step1">登录验证</div>
+        <div class="step" id="step2">提交任务</div>
+        <div class="step" id="step3">技术分析</div>
+        <div class="step" id="step4">基本面分析</div>
+        <div class="step" id="step5">新闻情绪</div>
+        <div class="step" id="step6">综合研判</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 错误提示 -->
+  <div class="error-bar" id="errorBar"></div>
+
+  <!-- 分析结果 -->
+  <div class="result-section" id="resultSection">
+    <div class="result-header">
+      <div class="result-stock-name" id="resultStockName"></div>
+      <div class="result-meta" id="resultMeta"></div>
+    </div>
+
+    <div class="signal-row" id="signalRow"></div>
+
+    <div class="verdict-card">
+      <div class="verdict-label">核心研判</div>
+      <div class="verdict-text" id="verdictText"></div>
+    </div>
+
+    <div class="modules-grid" id="modulesGrid"></div>
+
+    <div class="full-report" id="fullReportSection" style="display:none">
+      <div class="full-report-title">完整分析报告</div>
+      <div class="full-report-content" id="fullReportContent"></div>
+    </div>
+
+    <div class="disclaimer">
+      ⚠️ 以上内容由 AI 多智能体系统自动生成，仅供学习研究参考，不构成任何投资建议。投资有风险，决策需谨慎，请结合自身判断及专业顾问意见。
+    </div>
+  </div>
+
+  <!-- 历史记录 -->
+  <div class="history-section" id="historySection" style="display:none">
+    <div class="history-title">近期分析记录</div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+</main>
+
+<script>
+// ========== 配置 ==========
+const API_BASE = 'http://47.250.213.16:3000';
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'admin123';
+
+let authToken = null;
+let history = JSON.parse(localStorage.getItem('analysis_history') || '[]');
+
+// ========== 工具函数 ==========
+function showStatus(text, step) {
+  document.getElementById('statusBar').classList.add('show');
+  document.getElementById('statusText').innerText = text;
+  if (step) {
+    // 激活步骤
+    for (let i = 1; i <= 6; i++) {
+      const el = document.getElementById('step' + i);
+      if (i < step) el.className = 'step done';
+      else if (i === step) el.className = 'step active';
+      else el.className = 'step';
+    }
+  }
+}
+
+function hideStatus() {
+  document.getElementById('statusBar').classList.remove('show');
+}
+
+function showError(msg) {
+  const bar = document.getElementById('errorBar');
+  bar.innerText = '⚠️ ' + msg;
+  bar.classList.add('show');
+}
+
+function hideError() {
+  document.getElementById('errorBar').classList.remove('show');
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ========== API 调用 ==========
+async function login() {
+  const res = await fetch(`${API_BASE}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: ADMIN_USER, password: ADMIN_PASS })
+  });
+  if (!res.ok) throw new Error('登录失败，请稍后重试');
+  const data = await res.json();
+  return data.data?.access_token || data.access_token;
+}
+
+async function submitAnalysis(stockCode, market, depth) {
+  // 快速分析=1级，深度分析=3级
+  const analysisLevel = depth === 'quick' ? 1 : 3;
+
+  const res = await fetch(`${API_BASE}/api/analysis/single`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${authToken}`
+    },
+    body: JSON.stringify({
+      stock_code: stockCode,
+      market: market,
+      analysis_depth: analysisLevel,
+      analysts: ['market', 'fundamentals', 'news', 'social_media'],
+      quick_model: 'deepseek-chat',
+      deep_model: 'deepseek-chat',
+      include_sentiment: true,
+      include_risk: true,
+      language: 'zh'
+    })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || err.message || '提交分析任务失败');
+  }
+  const data = await res.json();
+  return data.data?.task_id || data.task_id;
+}
+
+async function pollStatus(taskId) {
+  const res = await fetch(`${API_BASE}/api/analysis/tasks/${taskId}/status`, {
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+  if (!res.ok) throw new Error('获取任务状态失败');
+  const data = await res.json();
+  return data.data || data;
+}
+
+async function getResult(taskId) {
+  const res = await fetch(`${API_BASE}/api/analysis/tasks/${taskId}/result`, {
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+  if (!res.ok) throw new Error('获取分析结果失败');
+  const data = await res.json();
+  return data.data || data;
+}
+
+// ========== 脱敏处理 ==========
+function desensitize(result) {
+  // 移除内部系统信息、API来源标识、用户信息等
+  const sensitivePatterns = [
+    /task_id[:：]\s*[a-zA-Z0-9\-]+/gi,
+    /user_id[:：]\s*\S+/gi,
+    /api_key[:：]\s*\S+/gi,
+    /数据来源[:：]\s*[^\n]+/gi,
+  ];
+
+  let text = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+  sensitivePatterns.forEach(p => { text = text.replace(p, ''); });
+  return text;
+}
+
+// ========== 解析结果 ==========
+function parseAndRender(result, stockCode, market) {
+  const resultSection = document.getElementById('resultSection');
+  resultSection.classList.add('show');
+
+  // 股票名称
+  const name = result.stock_name || result.name || stockCode;
+  document.getElementById('resultStockName').innerText = `${name}（${stockCode}）`;
+  document.getElementById('resultMeta').innerText = `${new Date().toLocaleDateString('zh-CN')} · AI多智能体分析`;
+
+  // 信号标签
+  const signal = extractSignal(result);
+  renderSignals(signal);
+
+  // 核心研判
+  const verdict = extractVerdict(result);
+  document.getElementById('verdictText').innerText = verdict;
+
+  // 各模块分析
+  renderModules(result);
+
+  // 完整报告
+  const fullText = extractFullReport(result);
+  if (fullText) {
+    document.getElementById('fullReportSection').style.display = 'block';
+    document.getElementById('fullReportContent').innerText = desensitize(fullText);
+  }
+
+  // 保存历史
+  saveHistory(stockCode, market, signal.overall, name);
+}
+
+function extractSignal(result) {
+  const raw = result.final_decision || result.decision || result.signal || result.recommendation || {};
+  return {
+    overall: raw.action || raw.signal || raw.recommendation || '待定',
+    confidence: raw.confidence || raw.score || null,
+    technical: result.technical_analysis?.signal || null,
+    fundamental: result.fundamental_analysis?.signal || null,
+  };
+}
+
+function renderSignals(signal) {
+  const row = document.getElementById('signalRow');
+  const signals = [
+    { label: '综合信号', value: signal.overall },
+    signal.technical ? { label: '技术面', value: signal.technical } : null,
+    signal.fundamental ? { label: '基本面', value: signal.fundamental } : null,
+  ].filter(Boolean);
+
+  row.innerHTML = signals.map(s => {
+    const cls = getBuySellClass(s.value);
+    return `<div class="signal-tag ${cls}"><div class="signal-dot"></div>${s.label}：${s.value}</div>`;
+  }).join('');
+}
+
+function getBuySellClass(signal) {
+  if (!signal) return 'hold';
+  const s = signal.toLowerCase();
+  if (s.includes('买') || s.includes('buy') || s.includes('增持') || s.includes('strong buy')) return 'buy';
+  if (s.includes('卖') || s.includes('sell') || s.includes('减持') || s.includes('strong sell')) return 'sell';
+  return 'hold';
+}
+
+function extractVerdict(result) {
+  return result.summary ||
+    result.final_decision?.reasoning ||
+    result.conclusion ||
+    result.analysis_summary ||
+    result.report?.summary ||
+    '分析完成，请查看下方各模块详情。';
+}
+
+function renderModules(result) {
+  const grid = document.getElementById('modulesGrid');
+  const modules = [
+    { key: 'technical_analysis', title: '技术面分析', fallback: result.technical },
+    { key: 'fundamental_analysis', title: '基本面分析', fallback: result.fundamental },
+    { key: 'news_analysis', title: '新闻舆情', fallback: result.news },
+    { key: 'sentiment_analysis', title: '市场情绪', fallback: result.sentiment },
+  ];
+
+  const cards = modules
+    .map(m => {
+      const data = result[m.key] || m.fallback;
+      if (!data) return null;
+      const content = typeof data === 'string' ? data :
+        data.summary || data.analysis || data.content || data.reasoning || JSON.stringify(data).slice(0, 200) + '…';
+      return `
+        <div class="module-card">
+          <div class="module-title">${m.title}</div>
+          <div class="module-content">${desensitize(content)}</div>
+        </div>`;
+    })
+    .filter(Boolean);
+
+  grid.innerHTML = cards.length ? cards.join('') : '';
+}
+
+function extractFullReport(result) {
+  return result.full_report ||
+    result.report?.content ||
+    result.detailed_analysis ||
+    null;
+}
+
+// ========== 历史记录 ==========
+function saveHistory(code, market, signal, name) {
+  history.unshift({ code, market, signal, name, date: new Date().toLocaleDateString('zh-CN') });
+  if (history.length > 10) history = history.slice(0, 10);
+  localStorage.setItem('analysis_history', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  if (!history.length) return;
+  const section = document.getElementById('historySection');
+  const list = document.getElementById('historyList');
+  section.style.display = 'block';
+  list.innerHTML = history.map(h => {
+    const cls = getBuySellClass(h.signal);
+    return `
+      <div class="history-item" onclick="loadHistory('${h.code}','${h.market}')">
+        <span class="history-code">${h.name || h.code}（${h.code}）</span>
+        <span class="history-signal signal-tag ${cls}" style="padding:2px 8px;font-size:11px;">${h.signal || '-'}</span>
+        <span class="history-date">${h.date}</span>
+      </div>`;
+  }).join('');
+}
+
+function loadHistory(code, market) {
+  document.getElementById('stockInput').value = code;
+  document.getElementById('marketSelect').value = market;
+  startAnalysis();
+}
+
+// ========== 主流程 ==========
+async function startAnalysis() {
+  const stockCode = document.getElementById('stockInput').value.trim();
+  const market = document.getElementById('marketSelect').value;
+  const depth = document.getElementById('depthSelect').value;
+
+  if (!stockCode) {
+    showError('请输入股票代码或名称');
+    return;
+  }
+
+  hideError();
+  document.getElementById('resultSection').classList.remove('show');
+  document.getElementById('analyzeBtn').disabled = true;
+
+  try {
+    // Step 1: 登录
+    showStatus('正在验证身份……', 1);
+    if (!authToken) {
+      authToken = await login();
+    }
+
+    // Step 2: 提交任务
+    showStatus('正在提交分析任务……', 2);
+    const taskId = await submitAnalysis(stockCode, market, depth);
+    if (!taskId) throw new Error('未获取到任务ID，请重试');
+
+    // Step 3-5: 轮询状态
+    const stepMap = {
+      'technical': 3,
+      'fundamental': 4,
+      'news': 5,
+      'finalizing': 6,
+      'completed': 6,
+    };
+
+    let attempts = 0;
+    const maxAttempts = 120; // 最多等10分钟
+
+    while (attempts < maxAttempts) {
+      await sleep(5000);
+      const status = await pollStatus(taskId);
+      const phase = status.current_phase || status.status || '';
+      const step = stepMap[phase] || 3;
+
+      const phaseText = {
+        'technical': '正在进行技术面分析……',
+        'fundamental': '正在分析基本面数据……',
+        'news': '正在分析新闻与市场情绪……',
+        'finalizing': '正在综合研判，生成报告……',
+        'completed': '分析完成，正在处理结果……',
+        'failed': '分析失败',
+      }[phase] || `正在分析中（${phase}）……`;
+
+      showStatus(phaseText, step);
+
+      if (status.status === 'completed' || status.status === 'success') {
+        showStatus('正在处理结果……', 6);
+        const result = await getResult(taskId);
+        hideStatus();
+        parseAndRender(result, stockCode, market);
+        break;
+      }
+
+      if (status.status === 'failed' || status.status === 'error') {
+        throw new Error(status.error_message || '分析任务失败，请重试');
+      }
+
+      attempts++;
+    }
+
+    if (attempts >= maxAttempts) {
+      throw new Error('分析超时，请稍后重试');
+    }
+
+  } catch (err) {
+    hideStatus();
+    // token可能过期，清除重试
+    if (err.message.includes('401') || err.message.includes('认证')) {
+      authToken = null;
+    }
+    showError(err.message);
+  } finally {
+    document.getElementById('analyzeBtn').disabled = false;
+  }
+}
+
+// 回车触发
+document.getElementById('stockInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startAnalysis();
+});
+
+// 初始化历史
+renderHistory();
+</script>
+</body>
+</html>
