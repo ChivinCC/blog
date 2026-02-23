@@ -569,8 +569,9 @@ async function login() {
 }
 
 async function submitAnalysis(stockCode, market, depth) {
-  // 快速分析=1级，深度分析=3级
-  const analysisLevel = depth === 'quick' ? 1 : 3;
+  const marketMap = { CN: 'A股', HK: '港股', US: '美股' };
+  const depthMap = { quick: '快速', deep: '深度' };
+  const today = new Date().toISOString().slice(0, 10);
 
   const res = await fetch(`${API_BASE}/api/analysis/single`, {
     method: 'POST',
@@ -579,15 +580,17 @@ async function submitAnalysis(stockCode, market, depth) {
       'Authorization': `Bearer ${authToken}`
     },
     body: JSON.stringify({
+      symbol: stockCode,
       stock_code: stockCode,
-      market: market,
-      analysis_depth: analysisLevel,
-      analysts: ['market', 'fundamentals', 'news', 'social_media'],
-      quick_model: 'deepseek-chat',
-      deep_model: 'deepseek-chat',
-      include_sentiment: true,
-      include_risk: true,
-      language: 'zh'
+      parameters: {
+        market_type: marketMap[market] || 'A股',
+        analysis_date: today,
+        research_depth: depthMap[depth] || '快速',
+        analysts: ['market', 'fundamentals', 'news', 'social_media'],
+        llm_provider: 'deepseek',
+        quick_thinking_llm: 'deepseek-chat',
+        deep_thinking_llm: 'deepseek-chat'
+      }
     })
   });
   if (!res.ok) {
