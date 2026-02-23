@@ -18,28 +18,22 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500&display=swap"></noscript>
 <title>百倍机会攻略</title>
 <style>
-/* 字体通过 <link> 非阻塞加载，见 <head> */
-
-/* ─── 设计系统 ───────────────────────────────────────
-   调色板：胡粉系暖米，参考日本传统纸本印刷质感
-   节奏：8px 基准网格，行高比 1.6–2.0 随字号收缩
-   ─────────────────────────────────────────────────── */
 :root {
-  --bg:       #F4EFE6;   /* 主背景：胡粉米白 */
-  --bg2:      #EBE6DC;   /* 次背景：hover、输入框 */
-  --bg3:      #E2DDD3;   /* 第三层：分隔、标签底 */
-  --line:     #D8D3CA;   /* 主线 */
-  --line2:    #EAE5DC;   /* 浅线 */
-  --t1:       #1C1917;   /* 主文：暖黑 */
-  --t2:       #5A5550;   /* 次文：暖灰棕 */
-  --t3:       #9E9890;   /* 辅文：浅暖灰 */
+  --bg:       #F4EFE6;
+  --bg2:      #EBE6DC;
+  --bg3:      #E2DDD3;
+  --line:     #D8D3CA;
+  --line2:    #EAE5DC;
+  --t1:       #1C1917;
+  --t2:       #5A5550;
+  --t3:       #9E9890;
   --tag-bg:   #E2DDD3;
   --tag-t:    #6A6560;
   --serif:    'Noto Serif SC', Georgia, serif;
   --sans:     'Noto Sans SC', -apple-system, sans-serif;
   --ease:     cubic-bezier(.4,0,.2,1);
   --max:      900px;
-  --col:      600px;     /* 正文最大宽度 */
+  --col:      600px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -55,7 +49,6 @@ body {
 img { display: block; max-width: 100%; }
 button, input { font-family: inherit; }
 
-/* ═══ NAV ════════════════════════════════════════════ */
 nav {
   position: sticky; top: 0; z-index: 200;
   height: 56px;
@@ -74,8 +67,6 @@ nav {
   font-family: var(--serif); font-weight: 600; font-size: 15px;
   color: var(--t1); letter-spacing: 0.05em; white-space: nowrap;
 }
-
-/* Search — expanded, no QR icon */
 .search-wrap { position: relative; flex: 1; }
 .search-wrap svg {
   position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
@@ -90,20 +81,17 @@ nav {
 #searchInput:focus { border-color: var(--t2); box-shadow: 0 0 0 3px rgba(92,85,80,0.1); }
 #searchInput::placeholder { color: var(--t3); }
 
-/* ═══ PAGES ══════════════════════════════════════════ */
 .page { display: none; }
 .page.active { display: block; animation: pgIn .25s var(--ease) both; }
 @keyframes pgIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
 
-/* ═══ HOME ═══════════════════════════════════════════ */
 .home-outer { max-width: var(--max); margin: 0 auto; padding: 0 32px 80px; }
 
-/* ─── Header band: title left, QR right ─── */
 .home-header {
   padding: 36px 0 20px;
   border-bottom: 1.5px solid var(--t1);
   display: flex;
-  align-items: center;       /* 垂直居中对齐，左右等高 */
+  align-items: center;
   justify-content: space-between;
   gap: 24px;
 }
@@ -123,15 +111,13 @@ nav {
   margin-top: 10px;
   font-size: 11px; color: var(--t3); letter-spacing: 0.04em;
 }
-
-/* QR — 横排紧凑徽章，高度与左侧文字区齐平 */
 .header-qr {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 7px;
-  padding-bottom: 14px;      /* 与左侧文字区底部视觉对齐 */
+  padding-bottom: 14px;
 }
 .header-qr-img {
   width: 80px; height: 80px;
@@ -150,7 +136,66 @@ nav {
   white-space: nowrap; line-height: 1.4;
 }
 
-/* ─── Article list ─── */
+/* ═══ AI投研入口 ═══════════════════════════════════ */
+.ai-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 24px 0 0;
+  padding: 20px 24px;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--t1);
+  border-radius: 2px;
+  text-decoration: none;
+  color: inherit;
+  transition: background .2s var(--ease), border-color .2s;
+  cursor: pointer;
+}
+.ai-entry:hover {
+  background: var(--bg3);
+  border-color: var(--t2);
+  border-left-color: var(--t1);
+}
+.ai-entry-left { flex: 1; min-width: 0; }
+.ai-entry-eyebrow {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--t3); margin-bottom: 6px;
+}
+.ai-entry-title {
+  font-family: var(--serif);
+  font-size: 17px; font-weight: 600;
+  color: var(--t1); line-height: 1.3;
+  margin-bottom: 5px;
+}
+.ai-entry-desc {
+  font-size: 12px; color: var(--t2); line-height: 1.7;
+}
+.ai-entry-arrow {
+  flex-shrink: 0;
+  color: var(--t3);
+  transition: transform .2s var(--ease), color .2s;
+}
+.ai-entry:hover .ai-entry-arrow {
+  transform: translateX(4px);
+  color: var(--t1);
+}
+
+/* 文章列表分隔线 */
+.list-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 28px 0 0;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--t3);
+}
+.list-divider::after {
+  content: ''; flex: 1;
+  height: 1px; background: var(--line2);
+}
+
 #articleList { margin-top: 0; }
 
 .article-row {
@@ -169,8 +214,6 @@ nav {
   padding-left: 12px;
   padding-right: 12px;
 }
-
-/* Thumbnail 2.35:1 */
 .row-thumb {
   flex-shrink: 0;
   width: 188px;
@@ -190,8 +233,6 @@ nav {
 .g2 { background: linear-gradient(140deg,#DDE8DC,#C8D9C8); }
 .g3 { background: linear-gradient(140deg,#E8DDD8,#D9C8C4); }
 .g4 { background: linear-gradient(140deg,#E8E3D8,#D9D3BC); }
-
-/* Text */
 .row-text { flex: 1; min-width: 0; }
 .row-top-meta {
   display: flex; align-items: center; gap: 8px;
@@ -216,7 +257,6 @@ nav {
   display: -webkit-box; -webkit-line-clamp: 2;
   -webkit-box-orient: vertical; overflow: hidden;
 }
-/* Arrow only, no readtime */
 .row-arrow {
   flex-shrink: 0;
   color: var(--t3); display: flex; align-items: center;
@@ -225,7 +265,6 @@ nav {
 .article-row:hover .row-arrow { transform: translateX(3px); color: var(--t1); }
 .row-arrow svg { width: 13px; height: 13px; }
 
-/* Empty / Loading */
 .list-state { padding: 60px 0; text-align: center; color: var(--t3); font-size: 13px; }
 .list-state svg { width: 28px; height: 28px; margin: 0 auto 10px; display: block; opacity: .2; }
 .spinner {
@@ -234,8 +273,6 @@ nav {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-
-/* ═══ PAGINATION ═════════════════════════════════════ */
 .pagination {
   display: flex; align-items: center; justify-content: center;
   gap: 4px; padding: 32px 0 8px; flex-wrap: wrap;
@@ -262,40 +299,29 @@ nav {
 }
 .pg-jump input:focus { border-color: var(--t2); }
 
-
-/* ─── Article nav (prev / next) ─── */
 .article-nav {
-  display: flex; gap: 1px;
-  margin-top: 56px;
-  border-top: 1.5px solid var(--t1);
+  display: flex; gap: 12px;
+  margin-top: 56px; padding-top: 28px;
+  border-top: 1px solid var(--line);
 }
 .nav-card {
-  flex: 1; padding: 20px 0 24px;
-  display: flex; flex-direction: column; gap: 6px;
-  cursor: pointer; transition: color .15s;
+  flex: 1; display: flex; flex-direction: column; gap: 6px;
+  padding: 16px 18px; border-radius: 6px;
+  border: 1px solid var(--line2); background: var(--bg2);
+  cursor: pointer; transition: border-color .15s, background .15s;
   min-width: 0;
 }
-.nav-empty { flex: 1; }
-.nav-prev { padding-right: 20px; border-right: 1px solid var(--line2); }
-.nav-next { padding-left: 20px; text-align: right; align-items: flex-end; }
-/* 只有上一篇时，右边是 nav-empty，取消右边框 */
-.nav-prev:last-child { border-right: none; padding-right: 0; }
-.nav-label {
-  font-size: 10px; font-weight: 500; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--t3);
-}
+.nav-card:hover { border-color: var(--line); background: var(--bg3); }
+.nav-label { font-size: 11px; color: var(--t3); letter-spacing: 0.04em; flex-shrink: 0; }
 .nav-title {
   font-family: var(--serif); font-size: 14px; font-weight: 600;
   color: var(--t1); line-height: 1.4;
   display: -webkit-box; -webkit-line-clamp: 2;
   -webkit-box-orient: vertical; overflow: hidden;
-  transition: color .15s;
 }
-.nav-card:hover .nav-title { color: var(--t2); }
+@media (max-width: 767px) { .article-nav { flex-direction: column; } }
 
-/* ═══ ARTICLE DETAIL ══════════════════════════════════ */
 .detail-outer { max-width: var(--col); margin: 0 auto; padding: 0 32px 100px; }
-
 .back-btn {
   display: inline-flex; align-items: center; gap: 7px;
   margin: 0 0 28px;
@@ -318,7 +344,6 @@ nav {
   margin-bottom: 36px; background: var(--line2);
 }
 .detail-cover img { width: 100%; height: 100%; object-fit: cover; }
-
 .detail-eyebrow {
   display: flex; align-items: center; gap: 8px;
   flex-wrap: wrap; margin-bottom: 14px;
@@ -332,13 +357,8 @@ nav {
   color: var(--t1); letter-spacing: -0.02em;
   margin-bottom: 14px;
 }
-.detail-subtitle { display: none; }
-.detail-divider { display: none; }
-
-/* Body typography — 阅读质感核心 */
 .detail-body {
   font-size: 16px; line-height: 2.0; color: var(--t1);
-  /* 使用 text-rendering 优化字形 */
   text-rendering: optimizeLegibility;
 }
 .detail-body h2 {
@@ -351,7 +371,6 @@ nav {
   margin: 28px 0 10px; line-height: 1.4;
 }
 .detail-body p { margin-bottom: 24px; }
-/* drop cap removed */
 .detail-body img { width: 100%; border-radius: 4px; margin: 28px 0; }
 .detail-body figure { margin: 32px 0; }
 .detail-body figcaption { text-align: center; font-size: 12px; color: var(--t3); margin-top: 8px; }
@@ -373,38 +392,9 @@ nav {
 .detail-body pre { background: #1C1917; color: #F0EBE0; border-radius: 6px; padding: 18px; overflow-x: auto; margin: 24px 0; }
 .detail-body pre code { background: none; border: none; padding: 0; color: inherit; font-size: 13px; }
 
-/* ═══ 上下篇导航 ════════════════════════════════════ */
-.article-nav {
-  display: flex; gap: 12px;
-  margin-top: 56px; padding-top: 28px;
-  border-top: 1px solid var(--line);
-}
-.nav-card {
-  flex: 1; display: flex; flex-direction: column; gap: 6px;
-  padding: 16px 18px; border-radius: 6px;
-  border: 1px solid var(--line2); background: var(--bg2);
-  cursor: pointer; transition: border-color .15s, background .15s;
-  min-width: 0;
-}
-.nav-card:hover { border-color: var(--line); background: var(--bg3); }
-.nav-label {
-  font-size: 11px; color: var(--t3);
-  letter-spacing: 0.04em; flex-shrink: 0;
-}
-.nav-title {
-  font-family: var(--serif); font-size: 14px; font-weight: 600;
-  color: var(--t1); line-height: 1.4;
-  display: -webkit-box; -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical; overflow: hidden;
-}
-@media (max-width: 767px) {
-  .article-nav { flex-direction: column; }
-}
-
 .video-embed { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 4px; margin: 24px 0; }
 .video-embed iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-/* ═══ FOOTER ══════════════════════════════════════════ */
 footer {
   border-top: 1px solid var(--line);
   padding: 28px 32px;
@@ -413,9 +403,6 @@ footer {
   letter-spacing: 0.05em;
 }
 
-/* ═══ RESPONSIVE ══════════════════════════════════════ */
-
-/* iPad (768–1024) */
 @media (max-width: 1024px) and (min-width: 768px) {
   :root { --max: 760px; --col: 680px; }
   .nav-inner, .home-outer, .detail-outer, footer { padding-left: 24px; padding-right: 24px; }
@@ -423,50 +410,32 @@ footer {
   .header-qr-img { width: 68px; height: 68px; }
 }
 
-/* Mobile (<768px) */
 @media (max-width: 767px) {
   .nav-inner { padding: 0 16px; }
   .home-outer { padding: 0 16px 60px; }
   .detail-outer { padding: 0 16px 80px; }
   footer { padding: 20px 16px; }
-
-  /* Nav: brand left, search fills right */
   .brand-name { font-size: 14px; }
-
-  /* Header: keep horizontal on mobile, shrink QR */
-  .home-header {
-    flex-direction: row;
-    align-items: center;
-    gap: 16px;
-    padding: 24px 0 16px;
-  }
+  .home-header { flex-direction: row; align-items: center; gap: 16px; padding: 24px 0 16px; }
   .header-qr { padding-bottom: 0; }
   .header-qr-img { width: 52px; height: 52px; }
   .header-qr-label { font-size: 9px; }
   .header-title { font-size: 18px; }
-
-  /* Article rows: stack on mobile */
-  .article-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 18px 0;
-  }
+  .ai-entry { padding: 16px 18px; gap: 14px; }
+  .ai-entry-title { font-size: 15px; }
+  .ai-entry-desc { font-size: 11px; }
+  .article-row { flex-direction: column; align-items: flex-start; gap: 10px; padding: 18px 0; }
   .article-row:hover { margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
   .row-thumb { width: 100%; }
   .row-title { font-size: 16px; }
   .row-summary { font-size: 12px; }
   .row-arrow { display: none; }
-
-  /* Detail */
   .detail-title { font-size: 20px; }
   .detail-body { font-size: 15px; line-height: 1.9; }
-
   .detail-body h2 { font-size: 17px; margin: 36px 0 12px; }
   .back-btn { margin: 0 0 24px; }
 }
 
-/* Small phones (<400px) */
 @media (max-width: 400px) {
   .header-title { font-size: 17px; }
   .row-title { font-size: 15px; }
@@ -476,7 +445,6 @@ footer {
 </head>
 <body>
 
-<!-- ═══ NAV ═══════════════════════════════════════════════ -->
 <nav>
   <div class="nav-inner">
     <a class="brand" href="#" onclick="showHome(); return false;">
@@ -491,11 +459,9 @@ footer {
   </div>
 </nav>
 
-<!-- ═══ HOME PAGE ══════════════════════════════════════════ -->
 <div class="page active" id="homePage">
   <div class="home-outer">
 
-    <!-- Header: title + QR side by side -->
     <div class="home-header">
       <div class="header-left">
         <div class="header-eyebrow">百倍机会攻略</div>
@@ -512,6 +478,23 @@ footer {
       </div>
     </div>
 
+    <!-- AI投研入口 -->
+    <a href="https://www.baibei.xyz/analysis.html" class="ai-entry" target="_blank" rel="noopener">
+      <div class="ai-entry-left">
+        <div class="ai-entry-eyebrow">工具 · 免费体验</div>
+        <div class="ai-entry-title">AI 多智能体投研分析</div>
+        <div class="ai-entry-desc">多位 AI 分析师协同，覆盖技术面、基本面、新闻舆情，一键生成完整投研报告</div>
+      </div>
+      <div class="ai-entry-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </div>
+    </a>
+
+    <!-- 文章列表标题 -->
+    <div class="list-divider">最新文章</div>
+
     <div id="articleList">
       <div class="list-state">
         <div class="spinner"></div>
@@ -522,7 +505,6 @@ footer {
   </div>
 </div>
 
-<!-- ═══ ARTICLE DETAIL ═════════════════════════════════════ -->
 <div class="page" id="articleDetailPage">
   <div class="detail-outer">
     <button class="back-btn" onclick="showHome()">
@@ -554,7 +536,7 @@ function sbFetch(path, opts) {
 }
 
 var CACHE_KEY = 'baibei_cache_v2';
-var CACHE_TTL = 30 * 60 * 1000; // 30分钟缓存
+var CACHE_TTL = 30 * 60 * 1000;
 
 function loadCache() {
   try {
@@ -615,7 +597,6 @@ function applyData(arts, sets) {
 }
 
 function init() {
-  // 先用缓存极速渲染
   var cache = loadCache();
   if (cache) {
     applyData(cache.arts, cache.sets);
@@ -624,7 +605,6 @@ function init() {
       '<div class="list-state"><div class="spinner"></div>正在加载…</div>';
   }
 
-  // 后台静默刷新（不阻塞渲染）
   Promise.all([
     sbFetch('articles?select=id,title,summary,cover,tags,date&order=date.desc,id.desc').then(function(r) { return r.json(); }),
     sbFetch('settings?select=*').then(function(r) { return r.json(); })
@@ -632,11 +612,9 @@ function init() {
     var arts = results[0];
     var sets = results[1];
     saveCache(arts, sets);
-    // 静默更新：重新渲染列表（不影响正在浏览的文章详情）
     var onDetail = document.getElementById('articleDetailPage').classList.contains('active');
     applyData(arts, sets);
     if (onDetail) {
-      // 用户正在看文章，不跳回列表
       document.getElementById('articleDetailPage').classList.add('active');
       document.getElementById('homePage').classList.remove('active');
     }
@@ -650,9 +628,7 @@ function init() {
   });
 }
 
-function calcDays() {
-  return allArticles.length;
-}
+function calcDays() { return allArticles.length; }
 
 function handleRoute() {
   var hash = location.hash.replace('#','');
@@ -670,7 +646,6 @@ window.addEventListener('popstate', function(e) {
   if (state && state.page === 'article' && state.id) {
     for (var i = 0; i < allArticles.length; i++) {
       if (String(allArticles[i].id) === String(state.id)) {
-        // 直接显示文章，不再 pushState
         document.getElementById('homePage').classList.remove('active');
         document.getElementById('articleDetailPage').classList.add('active');
         document.getElementById('searchWrap').style.display = 'none';
@@ -679,7 +654,6 @@ window.addEventListener('popstate', function(e) {
       }
     }
   }
-  // 回到首页
   document.getElementById('homePage').classList.add('active');
   document.getElementById('articleDetailPage').classList.remove('active');
   document.getElementById('searchWrap').style.display = '';
@@ -702,17 +676,8 @@ var PAGE_SIZE = 10;
 var currentPage = 1;
 var currentList = [];
 
-function renderList(list) {
-  currentList = list;
-  currentPage = 1;
-  renderPage();
-}
-
-function goPage(p) {
-  currentPage = p;
-  renderPage();
-  window.scrollTo(0, 0);
-}
+function renderList(list) { currentList = list; currentPage = 1; renderPage(); }
+function goPage(p) { currentPage = p; renderPage(); window.scrollTo(0, 0); }
 
 function renderPage() {
   var el = document.getElementById('articleList');
@@ -727,7 +692,6 @@ function renderPage() {
 
   if (!currentList.length) {
     el.innerHTML = '<div class="list-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><p>没有找到相关文章</p></div>';
-    el.insertAdjacentHTML('afterend', '');
     return;
   }
 
@@ -743,7 +707,6 @@ function renderPage() {
   for (var i = 0; i < rows.length; i++) {
     (function(row) {
       var id = row.getAttribute('data-id');
-      // 悬停/触摸开始时预加载正文
       row.addEventListener('mouseover', function() { prefetchArticle(id); });
       row.addEventListener('touchstart', function() { prefetchArticle(id); }, {passive:true});
       row.addEventListener('click', function() {
@@ -754,7 +717,6 @@ function renderPage() {
     })(rows[i]);
   }
 
-  // Render pagination
   var pg = document.getElementById('paginationBar');
   if (total <= 1) { pg.innerHTML = ''; return; }
 
@@ -773,7 +735,6 @@ function renderPage() {
 
   html += '<button class="pg-btn" onclick="goPage('+(currentPage+1)+')"'+(currentPage===total?' disabled':'')+'>'+
     '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>';
-
   html += '<div class="pg-jump"><span>跳至</span><input type="number" min="1" max="'+total+'" placeholder="—" onkeydown="if(event.key===\'Enter\'){var v=parseInt(this.value,10);if(v>=1&&v<='+total+'){goPage(v);this.value=\'\';}}"></div>';
 
   pg.innerHTML = html;
@@ -831,10 +792,8 @@ function showHome() {
   document.title = '百倍机会攻略';
 }
 
-// 预加载正文（悬停/触摸时触发）
 var prefetchTimer = null;
 function prefetchArticle(id) {
-  // 已有内容不重复拉
   for (var i = 0; i < allArticles.length; i++) {
     if (String(allArticles[i].id) === String(id)) {
       if (allArticles[i].content) return;
@@ -860,13 +819,8 @@ function showArticle(art) {
   try { history.pushState({page:'article',id:String(art.id)},art.title,'#article-'+art.id); } catch(e) {}
   document.title = art.title + ' — ' + (window._siteTitle || '百倍机会攻略');
 
-  // 正文已预加载好，直接渲染
-  if (art.content) {
-    renderArticleDetail(art);
-    return;
-  }
+  if (art.content) { renderArticleDetail(art); return; }
 
-  // 正在预拉中，轮询等待（最多等 800ms，之后兜底拉一次）
   if (art._fetching) {
     document.getElementById('articleContent').innerHTML =
       '<div class="list-state"><div class="spinner"></div>正在加载…</div>';
@@ -874,15 +828,11 @@ function showArticle(art) {
     var poll = setInterval(function() {
       waited += 50;
       if (art.content) { clearInterval(poll); renderArticleDetail(art); return; }
-      if (waited >= 800) {
-        clearInterval(poll);
-        renderArticleDetail(art); // 超时也渲染，content 可能还是空
-      }
+      if (waited >= 800) { clearInterval(poll); renderArticleDetail(art); }
     }, 50);
     return;
   }
 
-  // 没有预拉过，直接请求
   document.getElementById('articleContent').innerHTML =
     '<div class="list-state"><div class="spinner"></div>正在加载…</div>';
   sbFetch('articles?select=content&id=eq.' + String(art.id))
@@ -903,56 +853,33 @@ function renderArticleDetail(art) {
     ? '<div class="detail-cover"><img src="'+esc(art.cover)+'" alt="'+esc(art.title)+'"></div>'
     : '';
 
-  // 找上一篇（更早发布）和下一篇（更晚发布）
-  // allArticles 已按日期降序排列，所以 index+1 = 更早，index-1 = 更晚
   var idx = -1;
   for (var i = 0; i < allArticles.length; i++) {
     if (String(allArticles[i].id) === String(art.id)) { idx = i; break; }
   }
-  var prevArt = idx < allArticles.length - 1 ? allArticles[idx + 1] : null; // 更早
-  var nextArt = idx > 0                       ? allArticles[idx - 1] : null; // 更晚
+  var prevArt = idx < allArticles.length - 1 ? allArticles[idx + 1] : null;
+  var nextArt = idx > 0 ? allArticles[idx - 1] : null;
 
   var navHTML = '<div class="article-nav">';
   if (prevArt && nextArt) {
-    // 两篇都有：左右各一
-    navHTML += '<div class="nav-card nav-prev" data-navid="'+esc(String(prevArt.id))+'">'+
-      '<span class="nav-label">← 上一篇</span>'+
-      '<span class="nav-title">'+esc(prevArt.title)+'</span>'+
-    '</div>';
-    navHTML += '<div class="nav-card nav-next" data-navid="'+esc(String(nextArt.id))+'">'+
-      '<span class="nav-label">下一篇 →</span>'+
-      '<span class="nav-title">'+esc(nextArt.title)+'</span>'+
-    '</div>';
+    navHTML += '<div class="nav-card nav-prev" data-navid="'+esc(String(prevArt.id))+'"><span class="nav-label">← 上一篇</span><span class="nav-title">'+esc(prevArt.title)+'</span></div>';
+    navHTML += '<div class="nav-card nav-next" data-navid="'+esc(String(nextArt.id))+'"><span class="nav-label">下一篇 →</span><span class="nav-title">'+esc(nextArt.title)+'</span></div>';
   } else if (prevArt) {
-    // 只有上一篇（当前是最新）：撑满整行，右边放空白占位
-    navHTML += '<div class="nav-card nav-prev" data-navid="'+esc(String(prevArt.id))+'">'+
-      '<span class="nav-label">← 上一篇</span>'+
-      '<span class="nav-title">'+esc(prevArt.title)+'</span>'+
-    '</div>';
+    navHTML += '<div class="nav-card nav-prev" data-navid="'+esc(String(prevArt.id))+'"><span class="nav-label">← 上一篇</span><span class="nav-title">'+esc(prevArt.title)+'</span></div>';
     navHTML += '<div class="nav-empty"></div>';
   } else if (nextArt) {
-    // 只有下一篇（当前是最早）：左边放空白占位
     navHTML += '<div class="nav-empty"></div>';
-    navHTML += '<div class="nav-card nav-next" data-navid="'+esc(String(nextArt.id))+'">'+
-      '<span class="nav-label">下一篇 →</span>'+
-      '<span class="nav-title">'+esc(nextArt.title)+'</span>'+
-    '</div>';
+    navHTML += '<div class="nav-card nav-next" data-navid="'+esc(String(nextArt.id))+'"><span class="nav-label">下一篇 →</span><span class="nav-title">'+esc(nextArt.title)+'</span></div>';
   }
   navHTML += '</div>';
 
   document.getElementById('articleContent').innerHTML =
     coverHTML+
-    '<div class="detail-eyebrow">'+
-      tags+
-      '<span class="detail-date">'+fmtDate(art.date)+'</span>'+
-      '<span class="detail-rt">约 '+rt+' 分钟阅读</span>'+
-    '</div>'+
+    '<div class="detail-eyebrow">'+tags+'<span class="detail-date">'+fmtDate(art.date)+'</span><span class="detail-rt">约 '+rt+' 分钟阅读</span></div>'+
     '<h1 class="detail-title">'+esc(art.title)+'</h1>'+
-    
     '<div class="detail-body">'+renderContent(art.content||'')+'</div>'+
     navHTML;
 
-  // 绑定上下篇点击
   var navCards = document.getElementById('articleContent').querySelectorAll('.nav-prev, .nav-next');
   for (var k = 0; k < navCards.length; k++) {
     (function(card) {
@@ -994,23 +921,12 @@ function readTime(html) {
 }
 
 var DEMO = [
-  { id:1, title:'2024年最值得关注的10个百倍机会赛道', summary:'从AI基础设施、生物科技到新能源材料，深度拆解当前市场中最具爆发潜力的投资主线，以及如何提前布局。', date:'2024-12-15', tags:['宏观视野','机会扫描'], cover:'', content:'<h2>前言</h2><p>在每一个时代的转折点，总有一批先行者看到了别人还未看清的机会。2024年，全球正处于AI革命、能源转型与生物科技三重浪潮的交汇处，这是过去三十年最密集的机会窗口期之一。</p>' },
-  { id:2, title:'AI编程工具完全攻略：如何用 Cursor 实现 10 倍生产力', summary:'从零开始的 Cursor 使用手册，覆盖 Prompt 技巧、项目管理、团队协作，以及真实的效率提升案例。', date:'2024-12-08', tags:['工具攻略','AI效率'], cover:'', content:'<h2>为什么是 Cursor</h2><p>在所有AI编程工具中，Cursor是目前对专业开发者最友好的一款。它不仅支持全代码库的语义理解，还能在你写代码的过程中主动预判你的下一步。</p>' },
-  { id:3, title:'小红书内容创业完整方法论：从 0 到 10 万粉的路径拆解', summary:'基于 50+ 账号的实操数据，总结出一套可复制的内容方法论，适用于知识类、生活方式类和垂直行业类账号。', date:'2024-11-29', tags:['内容创业','小红书'], cover:'', content:'<h2>底层逻辑</h2><p>小红书的分发算法本质上是"内容质量 × 人群匹配度 × 互动率"的综合函数。</p>' },
-  { id:4, title:'独立开发者的产品定价策略：从免费到付费的跨越', summary:'定价是产品最重要的决策之一。本文从心理定价、竞争分析、价值锚定三个维度拆解定价方法论。', date:'2024-11-20', tags:['独立开发','商业化'], cover:'', content:'<h2>为什么定价这么难</h2><p>大多数独立开发者都会低估自己产品的价值。</p>' },
-  { id:5, title:'Newsletter 创业完全指南：从 0 开始建立订阅制媒体', summary:'Newsletter 正在成为新一代内容创业者的首选阵地。本文拆解从选题、冷启动到商业化的完整路径。', date:'2024-11-10', tags:['内容创业','Newsletter'], cover:'', content:'<h2>为什么是 Newsletter</h2><p>在所有内容形式中，邮件订阅拥有最高的读者粘性和最稳定的触达率。</p>' },
-  { id:6, title:'普通人如何识别一个机会的真实价值', summary:'从信息差、时间差、认知差三个维度，建立判断机会价值的底层框架，避免追热点、错过真机会。', date:'2024-10-30', tags:['认知升级','机会扫描'], cover:'', content:'<h2>什么是机会</h2><p>真正的机会往往不是大多数人都在谈论的那个，而是少数人默默在做的那个。</p>' },
-  { id:7, title:'副业变主业的完整路径：从第一笔收入到全职创业', summary:'拆解 100 个成功案例背后的共同规律，给出一条可操作的从副业到全职的路径图。', date:'2024-10-18', tags:['创业路径','副业'], cover:'', content:'<h2>为什么副业是最低风险的创业方式</h2><p>副业给了你试错的空间，同时保留了主收入的安全垫。</p>' },
-  { id:8, title:'2024 年最值得关注的 5 个冷门赛道', summary:'不在风口上但增速惊人的五个领域，提前进入意味着更低竞争、更高回报。', date:'2024-10-05', tags:['冷门赛道','机会扫描'], cover:'', content:'<h2>冷门不等于没机会</h2><p>恰恰相反，冷门赛道往往意味着竞争对手少、用户需求真实但未被满足。</p>' },
-  { id:9, title:'如何用 AI 工具把内容生产效率提升 5 倍', summary:'从选题、写作、配图到分发，系统梳理每个环节可以接入 AI 的节点和最优工具组合。', date:'2024-09-22', tags:['AI效率','内容创业'], cover:'', content:'<h2>内容生产的瓶颈在哪里</h2><p>大多数内容创作者的时间消耗在想写什么和怎么写好这两个环节，AI 恰好可以在这两处提供最大帮助。</p>' },
-  { id:10, title:'用系统思维看待个人成长：从线性努力到复利积累', summary:'为什么有些人越努力越焦虑，有些人看起来不费力却在持续进步？答案在于增长模型的差异。', date:'2024-09-10', tags:['认知升级','个人成长'], cover:'', content:'<h2>线性增长的陷阱</h2><p>大多数人的努力是线性的，投入多少时间，产出多少成果。但复利增长不一样，早期慢，后期快得惊人。</p>' },
-  { id:11, title:'知识付费 2.0：从卖课程到建生态的转型逻辑', summary:'知识付费的第一波红利已经消退，真正能持续的玩家正在用完全不同的模型构建壁垒。', date:'2024-08-28', tags:['商业化','内容创业'], cover:'', content:'<h2>为什么单纯卖课越来越难</h2><p>当所有人都在卖课时，课程本身就成了商品，只能打价格战。出路在于建立社区和生态。</p>' },
-  { id:12, title:'出海创业完全指南：从选品到第一笔美元收入', summary:'手把手拆解独立站从零到月入一万美元的完整路径，包含选品逻辑、流量策略和支付方案。', date:'2024-08-15', tags:['出海创业','独立开发'], cover:'', content:'<h2>为什么现在出海是好时机</h2><p>中国创业者在效率、成本控制和产品迭代速度上有天然优势，而海外市场对中国产品的接受度正在快速提升。</p>' }
+  { id:1, title:'2024年最值得关注的10个百倍机会赛道', summary:'从AI基础设施、生物科技到新能源材料，深度拆解当前市场中最具爆发潜力的投资主线，以及如何提前布局。', date:'2024-12-15', tags:['宏观视野','机会扫描'], cover:'', content:'<h2>前言</h2><p>在每一个时代的转折点，总有一批先行者看到了别人还未看清的机会。</p>' },
+  { id:2, title:'AI编程工具完全攻略：如何用 Cursor 实现 10 倍生产力', summary:'从零开始的 Cursor 使用手册，覆盖 Prompt 技巧、项目管理、团队协作，以及真实的效率提升案例。', date:'2024-12-08', tags:['工具攻略','AI效率'], cover:'', content:'<h2>为什么是 Cursor</h2><p>在所有AI编程工具中，Cursor是目前对专业开发者最友好的一款。</p>' }
 ];
 
 init();
 
-// 注册 Service Worker（离线缓存，二次访问秒开）
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('/sw.js').catch(function(){});
