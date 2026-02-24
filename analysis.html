@@ -562,34 +562,39 @@ function renderResult(result, stockCode) {
   if (existingGuide) existingGuide.remove();
   const guide = document.createElement('div');
   guide.id = 'pdfGuide';
-  guide.style.cssText = 'margin-top:16px;padding:16px 20px;background:var(--bg2);border:1px solid var(--border);border-radius:2px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;';
-  guide.innerHTML = `<div><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;">📄 查看完整投研报告</div><div style="font-size:12px;color:var(--text-light);">包含技术面、基本面、多空论点、风险评估等详细分析</div></div><button onclick="downloadPDF()" style="background:var(--accent);color:white;border:none;border-radius:2px;padding:9px 20px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;letter-spacing:0.5px;">下载完整 PDF</button>`;
+  guide.style.cssText = 'margin-top:16px;padding:16px 20px;background:var(--bg2);border:1px solid var(--border);border-radius:2px;';
+  guide.innerHTML = `
+    <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;">📄 查看完整投研报告</div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:14px;">包含技术面、基本面、多空论点、风险评估等详细分析</div>
+    <button id="pdfDownloadBtn" onclick="downloadPDF()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;background:var(--accent);color:white;border:none;border-radius:2px;font-size:14px;cursor:pointer;font-family:inherit;letter-spacing:1px;transition:background 0.2s;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;flex-shrink:0;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      下载完整 PDF
+    </button>`;
   document.getElementById('investCard').after(guide);
 }
 
 // ===== PDF下载：直接调用后端报告接口 =====
 async function downloadPDF() {
-  const btn = document.querySelector('.btn-download');
+  const btn = document.getElementById('pdfDownloadBtn');
+  if (!btn) return;
   const orig = btn.innerHTML;
   btn.innerHTML = '⏳ 获取报告中……';
   btn.disabled = true;
 
   try {
-    // 从reports列表找到对应的report_id
+    if (!authToken) authToken = await apiLogin();
     const res = await fetch(`${API_BASE}/api/reports/list`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
     const data = await res.json();
     const reports = data.data?.reports || data.reports || [];
 
-    // 找最近一条匹配当前股票代码的completed报告
     const report = reports.find(r =>
       r.stock_code === currentStockCode && r.status === 'completed'
     ) || reports.find(r => r.status === 'completed');
 
     if (!report) throw new Error('未找到可下载的报告');
 
-    // 下载PDF格式
     const dlRes = await fetch(`${API_BASE}/api/reports/${report.id}/download?format=pdf`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
@@ -604,10 +609,11 @@ async function downloadPDF() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    btn.innerHTML = '✅ 下载成功';
+    setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 2000);
 
   } catch(e) {
     showError('下载失败：' + e.message);
-  } finally {
     btn.innerHTML = orig;
     btn.disabled = false;
   }
