@@ -20,10 +20,14 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
 .nav-search { flex: 1; max-width: 400px; height: 32px; border: 1px solid var(--border); border-radius: 4px; padding: 0 12px; font-size: 13px; background: var(--bg2); color: var(--text); outline: none; }
 
 .main { max-width: 900px; margin: 0 auto; padding: 40px 16px 80px; }
-.page-header { margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.page-header { margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
 .page-title { font-family: 'Noto Serif SC', serif; font-size: 24px; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.02em; }
-.page-desc { font-size: 13px; color: var(--text-mid); line-height: 1.7; margin-bottom: 8px; }
-.page-warning { font-size: 11px; color: var(--text-light); letter-spacing: 0.05em; }
+.page-desc { font-size: 13px; color: var(--text-mid); line-height: 1.7; }
+.page-warning {
+  font-size: 11px; color: var(--text-light);
+  letter-spacing: 0.04em; line-height: 1.6;
+  padding: 10px 0 22px;
+}
 
 .input-section { background: var(--card); border: 1px solid var(--border); border-radius: 2px; padding: 24px; margin-bottom: 24px; }
 .input-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
@@ -201,8 +205,9 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
   <div class="page-header">
     <h1 class="page-title">AI 多智能体投研分析</h1>
     <p class="page-desc">多位 AI 分析师协同，覆盖技术面、基本面、新闻舆情，一键生成完整投研报告</p>
-    <p class="page-warning">此系统仅供 AI 项目演示，内容由 AI 自动生成，不提供任何投资建议，切勿当真！</p>
   </div>
+
+  <p class="page-warning">⚠️ 此系统仅供 AI 项目演示，内容由 AI 自动生成，不提供任何投资建议，切勿当真！</p>
 
   <div class="input-section">
     <div class="input-row">
@@ -227,7 +232,7 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
       </div>
       <button class="btn-analyze" id="analyzeBtn" onclick="startAnalysis()">开始分析</button>
     </div>
-    <div class="hint">支持 A股（6位）、港股（5位）、美股（英文代码）· 分析过程约 <span>5-10 分钟</span>，请耐心等待 · 今日剩余 <span id="quotaHint" style="color:var(--red);font-weight:600;"></span> 次免费分析</div>
+    <div class="hint">支持 A股（6位）、港股（5位）、美股（英文代码）· 分析过程约 <span>5-10 分钟</span>，请耐心等待 · 今日剩余 <span id="quotaHint" style="color:var(--red);font-weight:600;"></span> 次</div>
   </div>
 
   <div class="progress-section" id="progressSection">
@@ -798,7 +803,7 @@ async function startAnalysis() {
     // 没有缓存，检查每日限额
     if (!checkQuota()) {
       hideProgress();
-      showError(`今日免费分析次数（${DAILY_LIMIT}次）已用完，明天再来吧～`);
+      showError(`今日分析次数（${DAILY_LIMIT}次）已用完，明天再来吧～`);
       document.getElementById('analyzeBtn').disabled = false;
       return;
     }
