@@ -309,7 +309,7 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
   <div>© 百倍机会攻略 · AI 多智能体投研演示系统</div>
   <div><strong>⚠️ 此系统仅供 AI 技术演示，不提供任何投资建议，切勿当真！</strong></div>
   <div>市场有风险，投资需谨慎。本页面所有分析内容均为 AI 自动生成，不构成任何形式的投资建议或推荐。</div>
-  <div style="margin-top:6px">本页面来源于 Github 开源项目 <a href="https://github.com/hsliuustc/TradingAgents-CN" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px;">TradingAgents-CN</a></div>
+  <div style="margin-top:6px">本页面来源于 Github 开源项目 TradingAgents-CN</div>
 </footer>
 
 <script>
@@ -645,8 +645,44 @@ async function startAnalysis() {
     if (!authToken) authToken = await apiLogin();
 
     document.getElementById('currentStepText').textContent = '提交分析任务中……';
+
+    // 先查今日内是否已有该股票的分析结果
+    try {
+      if (!authToken) authToken = await apiLogin();
+      const rRes = await fetch(`${API_BASE}/api/reports/list`, {headers:{'Authorization':`Bearer ${authToken}`}});
+      const rData = await rRes.json();
+      const reports = rData.data?.reports || rData.reports || [];
+      const today = new Date().toISOString().slice(0, 10);
+      const cached = reports.find(r =>
+        r.stock_code === stockCode &&
+        r.status === 'completed' &&
+        r.analysis_date === today
+      );
+      if (cached) {
+        // 找到今日缓存，直接获取对应任务结果
+        document.getElementById('currentStepText').textContent = '✅ 发现今日已有分析结果，直接加载……';
+        document.getElementById('progressBarFill').style.width = '100%';
+        await sleep(600);
+        // 通过task_id获取结果
+        const result = await apiResult(cached.task_id);
+        result.report_id = cached.id;
+        hideProgress();
+        localStorage.removeItem('pending_task');
+        // 显示缓存提示
+        const bar = document.createElement('div');
+        bar.style.cssText = 'padding:10px 16px;background:#f0f7f2;border:1px solid #b8d9c4;border-left:3px solid var(--green);border-radius:0 2px 2px 0;font-size:12px;color:var(--green);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;';
+        bar.innerHTML = `<span>⚡ 今日已有分析结果，直接加载（节省算力）</span><button onclick="this.parentElement.remove()" style="border:none;background:none;cursor:pointer;color:var(--green);font-size:16px;line-height:1;">×</button>`;
+        document.querySelector('.input-section').after(bar);
+        renderResult(result, stockCode);
+        document.getElementById('analyzeBtn').disabled = false;
+        return;
+      }
+    } catch(e) {}
+
     const taskId = await apiSubmit(stockCode, market, depth);
     if (!taskId) throw new Error('未获取到任务ID，请重试');
+    // 保存taskId，防止页面刷新后丢失
+    try { localStorage.setItem('pending_task', JSON.stringify({ taskId, stockCode, market, depth, time: Date.now() })); } catch(e) {}
     document.getElementById('progressTitle').textContent = '分析进行中……';
 
     let attempts = 0;
@@ -668,6 +704,7 @@ async function startAnalysis() {
           if (report) result.report_id = report.id;
         } catch(e) {}
         hideProgress();
+        try { localStorage.removeItem('pending_task'); } catch(e) {}
         renderResult(result, stockCode);
         break;
       }
@@ -679,6 +716,7 @@ async function startAnalysis() {
     if (attempts >= 200) throw new Error('分析超时，请稍后重试');
   } catch(err) {
     hideProgress();
+    try { localStorage.removeItem('pending_task'); } catch(e) {}
     if (err.message.includes('401')) authToken = null;
     showError(err.message);
   } finally {
@@ -700,11 +738,12 @@ function saveHistory(result, stockCode) {
     const action = da.action || result.recommendation?.split('。')[0] || '';
     const reportId = result.report_id || result.analysis_id || null;
     let history = loadHistory();
-    // 去重：同一股票代码只保留最新一条
     history = history.filter(h => h.stockCode !== stockCode);
     history.unshift({ stockCode, action, reportId, time: Date.now() });
     if (history.length > HISTORY_MAX) history = history.slice(0, HISTORY_MAX);
     localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    // 每条记录单独存完整结果，供查看时恢复
+    try { localStorage.setItem(`analysis_result_${stockCode}`, JSON.stringify({ result, stockCode, time: Date.now() })); } catch(e) {}
     renderHistory();
   } catch(e) {}
 }
@@ -749,9 +788,10 @@ function restoreHistory(idx) {
   const history = loadHistory();
   const h = history[idx];
   if (!h) return;
-  // 从localStorage找对应的完整结果
   try {
-    const saved = localStorage.getItem('last_analysis');
+    // 优先从该股票独立缓存中恢复
+    const key = `analysis_result_${h.stockCode}`;
+    const saved = localStorage.getItem(key) || localStorage.getItem('last_analysis');
     if (saved) {
       const { result, stockCode } = JSON.parse(saved);
       if (stockCode === h.stockCode) {
@@ -763,7 +803,6 @@ function restoreHistory(idx) {
       }
     }
   } catch(e) {}
-  // 没有缓存，提示重新分析
   document.getElementById('stockInput').value = h.stockCode;
   showError(`${h.stockCode} 的详细结果已过期，请重新提交分析`);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -801,23 +840,87 @@ async function downloadHistoryPDF(idx) {
   // 先渲染历史列表
   renderHistory();
 
+  // 检查是否有未完成的任务（页面刷新场景）
+  try {
+    const pendingRaw = localStorage.getItem('pending_task');
+    if (pendingRaw) {
+      const { taskId, stockCode, time } = JSON.parse(pendingRaw);
+      // 只恢复2小时内的任务
+      if (taskId && stockCode && Date.now() - time < 2 * 60 * 60 * 1000) {
+        currentStockCode = stockCode;
+        document.getElementById('stockInput').value = stockCode;
+        // 显示恢复提示
+        const bar = document.createElement('div');
+        bar.style.cssText = 'padding:10px 16px;background:#f7f4ee;border:1px solid var(--border);border-radius:2px;font-size:12px;color:var(--accent);margin-bottom:16px;';
+        bar.innerHTML = `⏳ 检测到正在进行的分析任务（${stockCode}），正在恢复……`;
+        document.querySelector('.input-section').after(bar);
+        // 恢复轮询
+        document.getElementById('analyzeBtn').disabled = true;
+        showProgress();
+        startTimer();
+        document.getElementById('progressTitle').textContent = '恢复分析任务……';
+        // 异步恢复
+        (async () => {
+          try {
+            if (!authToken) authToken = await apiLogin();
+            let attempts = 0;
+            while (attempts < 200) {
+              await sleep(5000);
+              const status = await apiStatus(taskId);
+              updateProgress(status);
+              if (status.status === 'completed' || status.status === 'success') {
+                document.getElementById('currentStepText').textContent = '✅ 分析完成，正在加载结果……';
+                document.getElementById('progressBarFill').style.width = '100%';
+                await sleep(600);
+                const result = await apiResult(taskId);
+                try {
+                  const rRes = await fetch(`${API_BASE}/api/reports/list`, {headers:{'Authorization':`Bearer ${authToken}`}});
+                  const rData = await rRes.json();
+                  const reports = rData.data?.reports || rData.reports || [];
+                  const report = reports.find(r => r.stock_code === stockCode && r.status === 'completed');
+                  if (report) result.report_id = report.id;
+                } catch(e) {}
+                hideProgress();
+                localStorage.removeItem('pending_task');
+                bar.remove();
+                renderResult(result, stockCode);
+                break;
+              }
+              if (status.status === 'failed' || status.status === 'error') {
+                throw new Error(status.error_message || '分析失败');
+              }
+              attempts++;
+            }
+          } catch(err) {
+            hideProgress();
+            localStorage.removeItem('pending_task');
+            bar.remove();
+            showError('任务恢复失败：' + err.message);
+          } finally {
+            document.getElementById('analyzeBtn').disabled = false;
+          }
+        })();
+        return; // 有pending任务就不再恢复上次结果
+      } else {
+        localStorage.removeItem('pending_task');
+      }
+    }
+  } catch(e) {}
+
+  // 恢复上次已完成的结果
   try {
     const saved = localStorage.getItem('last_analysis');
     if (!saved) return;
     const { result, stockCode, time } = JSON.parse(saved);
-    // 只恢复24小时内的结果
     if (Date.now() - time > 24 * 60 * 60 * 1000) return;
     if (!result || !stockCode) return;
     currentStockCode = stockCode;
     document.getElementById('stockInput').value = stockCode;
-
-    // 显示恢复提示
     const bar = document.createElement('div');
     bar.style.cssText = 'padding:10px 16px;background:#f7f4ee;border:1px solid var(--border);border-radius:2px;font-size:12px;color:var(--accent);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;';
     const t = new Date(time).toLocaleString('zh-CN', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
     bar.innerHTML = `<span>📋 已恢复上次分析结果（${stockCode} · ${t}）</span><button onclick="this.parentElement.remove()" style="border:none;background:none;cursor:pointer;color:var(--text-light);font-size:16px;line-height:1;">×</button>`;
     document.querySelector('.input-section').after(bar);
-
     renderResult(result, stockCode);
   } catch(e) {}
 })();
