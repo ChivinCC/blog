@@ -119,8 +119,25 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
 .page-footer strong { color: var(--red); }
 .page-footer a { color: var(--accent); }
 
+/* 排行榜 */
+.ranking-section { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); }
+.ranking-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.ranking-item { background: var(--card); border: 1px solid var(--border); border-radius: 2px; padding: 12px 14px; cursor: pointer; transition: background 0.15s, border-color 0.15s; display: flex; flex-direction: column; gap: 4px; }
+.ranking-item:hover { background: var(--bg2); border-color: var(--accent-light); }
+.ranking-rank { font-size: 10px; color: var(--text-light); }
+.ranking-rank.top { color: var(--accent); font-weight: 600; }
+.ranking-code { font-family: 'Noto Serif SC', serif; font-size: 15px; font-weight: 600; color: var(--text); }
+.ranking-signal { font-size: 11px; font-weight: 500; }
+.ranking-signal.buy { color: var(--green); }
+.ranking-signal.sell { color: var(--red); }
+.ranking-signal.hold { color: var(--accent); }
+.ranking-date { font-size: 10px; color: var(--text-light); }
+@media (max-width: 640px) {
+  .ranking-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+}
+
 /* 历史记录 */
-.history-section { max-width: 900px; margin: 32px auto 0; padding: 0 16px; }
+.history-section { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
 .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
 .history-title { font-family: 'Noto Serif SC', serif; font-size: 15px; font-weight: 600; }
 .history-clear { font-size: 12px; color: var(--text-light); background: none; border: 1px solid var(--border); border-radius: 2px; padding: 4px 10px; cursor: pointer; font-family: inherit; }
@@ -142,7 +159,7 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
 .history-btn-pdf:hover { background: var(--text); border-color: var(--text); }
 
 @media (max-width: 640px) {
-  .history-section { padding: 0 12px; }
+  .ranking-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
   .history-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
 }
 
@@ -233,7 +250,7 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
       </div>
       <button class="btn-analyze" id="analyzeBtn" onclick="startAnalysis()">开始分析</button>
     </div>
-    <div class="hint">支持 A股（6位）、港股（5位）、美股（英文代码）· 分析过程约 <span>5-10 分钟</span>，请耐心等待</div>
+    <div class="hint">支持 A股（6位）、港股（5位）、美股（英文代码）· 分析过程约 <span>5-10 分钟</span>，请耐心等待 · 今日剩余 <span id="quotaHint" style="color:var(--red);font-weight:600;"></span> 次免费分析</div>
   </div>
 
   <div class="progress-section" id="progressSection">
@@ -294,16 +311,26 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
       <strong>⚠️ 重要免责声明：</strong>以上全部内容由 AI 多智能体系统自动生成，此系统仅供 AI 技术演示，不提供任何投资建议，切勿当真！股票投资有风险，市场情况随时变化，任何投资决策请结合自身情况，并咨询专业持牌投资顾问。
     </div>
   </div>
-</main>
 
-<!-- 历史分析记录 -->
-<div class="history-section" id="historySection" style="display:none">
-  <div class="history-header">
-    <div class="history-title">历史分析记录</div>
-    <button class="history-clear" onclick="clearHistory()">清空</button>
+  <!-- 热门分析排行榜 -->
+  <div class="ranking-section" id="rankingSection">
+    <div class="history-header">
+      <div class="history-title">🔥 近期热门分析</div>
+      <span style="font-size:11px;color:var(--text-light)">点击直接加载结果</span>
+    </div>
+    <div id="rankingList"><div class="list-state" style="padding:20px 0"><div class="spinner"></div>加载中…</div></div>
   </div>
-  <div id="historyList"></div>
-</div>
+
+  <!-- 历史分析记录 -->
+  <div class="history-section" id="historySection">
+    <div class="history-header">
+      <div class="history-title">历史分析记录</div>
+      <button class="history-clear" onclick="clearHistory()">清空</button>
+    </div>
+    <div id="historyList"><div style="font-size:13px;color:var(--text-light);padding:16px 0;">暂无记录，分析完成后自动保存</div></div>
+  </div>
+
+</main>
 
 <footer class="page-footer">
   <div>© 百倍机会攻略 · AI 多智能体投研演示系统</div>
@@ -626,12 +653,138 @@ async function downloadPDF() {
   }
 }
 
+function updateQuotaHint() {
+  const el = document.getElementById('quotaHint');
+  if (el) el.textContent = remainingQuota();
+}
+
+// ===== 排行榜 =====
+async function loadRanking() {
+  try {
+    if (!authToken) authToken = await apiLogin();
+    const rRes = await fetch(`${API_BASE}/api/reports/list`, {headers:{'Authorization':`Bearer ${authToken}`}});
+    const rData = await rRes.json();
+    const reports = (rData.data?.reports || rData.reports || []).filter(r => r.status === 'completed');
+
+    // 按股票代码统计出现次数，取最新的一条记录
+    const map = {};
+    reports.forEach(r => {
+      if (!map[r.stock_code]) {
+        map[r.stock_code] = { count: 0, latest: r };
+      }
+      map[r.stock_code].count++;
+      if (r.analysis_date > map[r.stock_code].latest.analysis_date) {
+        map[r.stock_code].latest = r;
+      }
+    });
+
+    // 按出现次数排序，取前10
+    const ranked = Object.values(map)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    if (!ranked.length) {
+      document.getElementById('rankingList').innerHTML = '<div style="font-size:13px;color:var(--text-light);padding:16px 0;">暂无数据，等待更多用户分析后显示</div>';
+      return;
+    }
+
+    const section = document.getElementById('rankingSection');
+    const list = document.getElementById('rankingList');
+
+    const medals = ['🥇','🥈','🥉'];
+    list.innerHTML = `<div class="ranking-grid">${ranked.map((item, i) => {
+      const r = item.latest;
+      // 从报告summary里猜信号
+      const sig = r.summary || '';
+      let action = '持有';
+      if (sig.includes('买入') || sig.includes('增持')) action = '买入';
+      else if (sig.includes('卖出') || sig.includes('减持')) action = '卖出';
+      const cls = clsSignal(action);
+      const rankLabel = medals[i] || `#${i+1}`;
+      const daysAgo = Math.floor((Date.now() - new Date(r.analysis_date).getTime()) / (24*60*60*1000));
+      const dateLabel = daysAgo === 0 ? '今日' : `${daysAgo}天前`;
+      return `<div class="ranking-item" onclick="loadRankingItem('${esc2(r.stock_code)}','${esc2(r.task_id)}','${esc2(r.id)}')">
+        <div class="ranking-rank ${i<3?'top':''}">${rankLabel} · 共${item.count}次</div>
+        <div class="ranking-code">${esc2(r.stock_code)}</div>
+        <div class="ranking-signal ${cls}">${action}</div>
+        <div class="ranking-date">${dateLabel}分析</div>
+      </div>`;
+    }).join('')}</div>`;
+  } catch(e) {
+    document.getElementById('rankingList').innerHTML = '<div style="font-size:13px;color:var(--text-light);padding:16px 0;">暂无数据，等待更多用户分析后显示</div>';
+  }
+}
+
+async function loadRankingItem(stockCode, taskId, reportId) {
+  currentStockCode = stockCode;
+  document.getElementById('stockInput').value = stockCode;
+  hideError();
+  document.getElementById('resultSection').classList.remove('show');
+  document.getElementById('analyzeBtn').disabled = true;
+  showProgress();
+  startTimer();
+  document.getElementById('progressTitle').textContent = '加载分析结果……';
+  document.getElementById('currentStepText').textContent = '正在读取……';
+  document.getElementById('progressBarFill').style.width = '80%';
+  try {
+    if (!authToken) authToken = await apiLogin();
+    const result = await apiResult(taskId);
+    result.report_id = reportId;
+    hideProgress();
+    const bar = document.createElement('div');
+    bar.style.cssText = 'padding:10px 16px;background:#f0f7f2;border:1px solid #b8d9c4;border-left:3px solid var(--green);border-radius:0 2px 2px 0;font-size:12px;color:var(--green);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;';
+    bar.innerHTML = `<span>⚡ 热门股票，直接加载已有分析结果（节省算力）</span><button onclick="this.parentElement.remove()" style="border:none;background:none;cursor:pointer;color:var(--green);font-size:16px;line-height:1;">×</button>`;
+    document.querySelector('.input-section').after(bar);
+    renderResult(result, stockCode);
+    window.scrollTo({ top: document.getElementById('resultSection').offsetTop - 70, behavior: 'smooth' });
+  } catch(e) {
+    hideProgress();
+    showError('加载失败：' + e.message);
+  } finally {
+    document.getElementById('analyzeBtn').disabled = false;
+  }
+}
+
+// ===== 每日使用限额 =====
+const DAILY_LIMIT = 3;
+const QUOTA_KEY = 'daily_quota';
+
+function getQuota() {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const raw = localStorage.getItem(QUOTA_KEY);
+    if (!raw) return { date: today, count: 0 };
+    const q = JSON.parse(raw);
+    if (q.date !== today) return { date: today, count: 0 }; // 新的一天重置
+    return q;
+  } catch(e) { return { date: new Date().toISOString().slice(0,10), count: 0 }; }
+}
+
+function useQuota() {
+  const q = getQuota();
+  q.count++;
+  localStorage.setItem(QUOTA_KEY, JSON.stringify(q));
+  updateQuotaHint();
+}
+
+function checkQuota() {
+  const q = getQuota();
+  return q.count < DAILY_LIMIT;
+}
+
+function remainingQuota() {
+  return Math.max(0, DAILY_LIMIT - getQuota().count);
+}
+
 // ===== 主流程 =====
 async function startAnalysis() {
   const stockCode = document.getElementById('stockInput').value.trim();
   const market = document.getElementById('marketSelect').value;
   const depth = document.getElementById('depthSelect').value;
   if (!stockCode) { showError('请输入股票代码或名称'); return; }
+
+  // 检查每日限额（命中缓存不扣次数，只有真正提交新任务才扣）
+  // 限额检查放在确认不是缓存之后，见下方逻辑
   currentStockCode = stockCode;
   hideError();
   document.getElementById('resultSection').classList.remove('show');
@@ -646,38 +799,48 @@ async function startAnalysis() {
 
     document.getElementById('currentStepText').textContent = '提交分析任务中……';
 
-    // 先查今日内是否已有该股票的分析结果
+    // 先查2天内是否已有该股票的分析结果
     try {
       if (!authToken) authToken = await apiLogin();
       const rRes = await fetch(`${API_BASE}/api/reports/list`, {headers:{'Authorization':`Bearer ${authToken}`}});
       const rData = await rRes.json();
       const reports = rData.data?.reports || rData.reports || [];
-      const today = new Date().toISOString().slice(0, 10);
+      // 取2天前的日期
+      const twoDaysAgo = new Date(Date.now() - 2*24*60*60*1000).toISOString().slice(0, 10);
       const cached = reports.find(r =>
         r.stock_code === stockCode &&
         r.status === 'completed' &&
-        r.analysis_date === today
+        r.analysis_date >= twoDaysAgo
       );
       if (cached) {
-        // 找到今日缓存，直接获取对应任务结果
-        document.getElementById('currentStepText').textContent = '✅ 发现今日已有分析结果，直接加载……';
+        document.getElementById('currentStepText').textContent = '✅ 发现近期分析结果，直接加载……';
         document.getElementById('progressBarFill').style.width = '100%';
         await sleep(600);
-        // 通过task_id获取结果
         const result = await apiResult(cached.task_id);
         result.report_id = cached.id;
         hideProgress();
         localStorage.removeItem('pending_task');
-        // 显示缓存提示
+        const daysAgo = Math.floor((Date.now() - new Date(cached.analysis_date).getTime()) / (24*60*60*1000));
+        const timeLabel = daysAgo === 0 ? '今日' : `${daysAgo}天前`;
         const bar = document.createElement('div');
         bar.style.cssText = 'padding:10px 16px;background:#f0f7f2;border:1px solid #b8d9c4;border-left:3px solid var(--green);border-radius:0 2px 2px 0;font-size:12px;color:var(--green);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;';
-        bar.innerHTML = `<span>⚡ 今日已有分析结果，直接加载（节省算力）</span><button onclick="this.parentElement.remove()" style="border:none;background:none;cursor:pointer;color:var(--green);font-size:16px;line-height:1;">×</button>`;
+        bar.innerHTML = `<span>⚡ 已有他人${timeLabel}的分析结果，直接加载（节省算力）</span><button onclick="this.parentElement.remove()" style="border:none;background:none;cursor:pointer;color:var(--green);font-size:16px;line-height:1;">×</button>`;
         document.querySelector('.input-section').after(bar);
         renderResult(result, stockCode);
         document.getElementById('analyzeBtn').disabled = false;
         return;
       }
     } catch(e) {}
+
+    // 没有缓存，检查每日限额
+    if (!checkQuota()) {
+      hideProgress();
+      showError(`今日免费分析次数（${DAILY_LIMIT}次）已用完，明天再来吧～`);
+      document.getElementById('analyzeBtn').disabled = false;
+      return;
+    }
+    // 扣除本次使用次数
+    useQuota();
 
     const taskId = await apiSubmit(stockCode, market, depth);
     if (!taskId) throw new Error('未获取到任务ID，请重试');
@@ -760,10 +923,11 @@ function clearHistory() {
 
 function renderHistory() {
   const history = loadHistory();
-  const section = document.getElementById('historySection');
   const list = document.getElementById('historyList');
-  if (!history.length) { section.style.display = 'none'; return; }
-  section.style.display = 'block';
+  if (!history.length) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--text-light);padding:16px 0;">暂无记录，分析完成后自动保存</div>';
+    return;
+  }
   list.innerHTML = `<div class="history-grid">${history.map((h, i) => {
     const cls = clsSignal(h.action);
     const label = h.action || '—';
@@ -837,8 +1001,12 @@ async function downloadHistoryPDF(idx) {
   }
 }
 (function restoreLastResult() {
-  // 先渲染历史列表
+  // 初始化剩余次数显示
+  updateQuotaHint();
+  // 渲染历史列表
   renderHistory();
+  // 加载排行榜
+  loadRanking();
 
   // 检查是否有未完成的任务（页面刷新场景）
   try {
