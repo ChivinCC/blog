@@ -138,50 +138,79 @@ nav {
 
 /* ═══ AI投研入口 ═══════════════════════════════════ */
 .ai-entry {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  margin: 24px 0 0;
-  padding: 20px 24px;
-  background: var(--bg2);
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--t1);
-  border-radius: 2px;
+  display: block;
+  margin: 28px 0 0;
+  padding: 28px 28px 24px;
+  background: linear-gradient(160deg, #1E1810 0%, #161209 50%, #1E1810 100%);
+  border-radius: 3px;
   text-decoration: none;
   color: inherit;
-  transition: background .2s var(--ease), border-color .2s;
-  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: opacity .25s var(--ease);
+  border: 1px solid rgba(180,145,55,0.25);
+  box-shadow: inset 0 1px 0 rgba(200,165,70,0.15), inset 0 -1px 0 rgba(0,0,0,0.3);
 }
-.ai-entry:hover {
-  background: var(--bg3);
-  border-color: var(--t2);
-  border-left-color: var(--t1);
+.ai-entry::before {
+  content: 'AI';
+  position: absolute;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%) skewX(-10deg);
+  font-family: var(--serif);
+  font-size: 220px;
+  font-weight: 700;
+  font-style: italic;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(190,155,55,0.18);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: -8px;
+  z-index: 0;
 }
-.ai-entry-left { flex: 1; min-width: 0; }
-.ai-entry-eyebrow {
-  font-size: 10px; font-weight: 500;
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--t3); margin-bottom: 6px;
+.ai-entry::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 20%; right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,165,65,0.6), rgba(220,185,80,0.9), rgba(200,165,65,0.6), transparent);
 }
+.ai-entry:hover { opacity: 0.85; }
 .ai-entry-title {
   font-family: var(--serif);
-  font-size: 17px; font-weight: 600;
-  color: var(--t1); line-height: 1.3;
-  margin-bottom: 5px;
+  font-size: 20px; font-weight: 600;
+  background: linear-gradient(135deg, #C8A84A 0%, #E8CC6A 40%, #BF9E42 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.3;
+  margin-bottom: 8px;
+  position: relative; z-index: 1;
 }
 .ai-entry-desc {
-  font-size: 12px; color: var(--t2); line-height: 1.7;
+  font-size: 12px;
+  color: rgba(185,158,95,0.45);
+  line-height: 1.8;
+  margin-bottom: 20px;
+  position: relative; z-index: 1;
 }
-.ai-entry-arrow {
-  flex-shrink: 0;
-  color: var(--t3);
-  transition: transform .2s var(--ease), color .2s;
+.ai-entry-cta {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.08em;
+  color: rgba(185,155,70,0.7);
+  border-bottom: 1px solid rgba(180,145,55,0.25);
+  padding-bottom: 2px;
+  transition: color .2s, border-color .2s;
+  position: relative; z-index: 1;
 }
-.ai-entry:hover .ai-entry-arrow {
-  transform: translateX(4px);
-  color: var(--t1);
+.ai-entry:hover .ai-entry-cta {
+  color: rgba(210,175,85,0.9);
+  border-color: rgba(210,175,85,0.5);
 }
+.ai-entry-cta svg { transition: transform .2s var(--ease); }
+.ai-entry:hover .ai-entry-cta svg { transform: translateX(3px); }
 
 /* 文章列表分隔线 */
 .list-divider {
@@ -421,9 +450,9 @@ footer {
   .header-qr-img { width: 52px; height: 52px; }
   .header-qr-label { font-size: 9px; }
   .header-title { font-size: 18px; }
-  .ai-entry { padding: 16px 18px; gap: 14px; }
-  .ai-entry-title { font-size: 15px; }
-  .ai-entry-desc { font-size: 11px; }
+  .ai-entry { padding: 22px 20px 20px; }
+  .ai-entry-title { font-size: 18px; }
+  .ai-entry-desc { font-size: 12px; }
   .article-row { flex-direction: column; align-items: flex-start; gap: 10px; padding: 18px 0; }
   .article-row:hover { margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
   .row-thumb { width: 100%; }
@@ -480,13 +509,11 @@ footer {
 
     <!-- AI投研入口 -->
     <a href="https://www.baibei.xyz/analysis.html" class="ai-entry" target="_blank" rel="noopener">
-      <div class="ai-entry-left">
-        <div class="ai-entry-eyebrow">工具 · 免费体验</div>
-        <div class="ai-entry-title">AI 多智能体投研分析</div>
-        <div class="ai-entry-desc">多位 AI 分析师协同，覆盖技术面、基本面、新闻舆情，一键生成完整投研报告</div>
-      </div>
-      <div class="ai-entry-arrow">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
+      <div class="ai-entry-title">AI 多智能体投研分析</div>
+      <div class="ai-entry-desc">多位 AI 分析师协同，覆盖技术面、基本面、新闻舆情，一键生成完整投研报告</div>
+      <div class="ai-entry-cta">
+        免费体验
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14">
           <path d="M5 12h14M12 5l7 7-7 7"/>
         </svg>
       </div>
