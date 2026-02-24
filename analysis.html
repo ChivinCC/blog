@@ -705,7 +705,7 @@ async function loadRanking() {
       const dateLabel = daysAgo === 0 ? '今日' : `${daysAgo}天前`;
       return `<div class="ranking-item" onclick="loadRankingItem('${esc2(r.stock_code)}','${esc2(r.task_id)}','${esc2(r.id)}')">
         <div class="ranking-rank ${i<3?'top':''}">${rankLabel} · 共${item.count}次</div>
-        <div class="ranking-code">${esc2(r.stock_code)}</div>
+        <div class="ranking-code">${esc2(r.stock_name || r.stock_code)}</div>
         <div class="ranking-signal ${cls}">${action}</div>
         <div class="ranking-date">${dateLabel}分析</div>
       </div>`;
@@ -900,12 +900,12 @@ function saveHistory(result, stockCode) {
     const da = result.detailed_analysis || {};
     const action = da.action || result.recommendation?.split('。')[0] || '';
     const reportId = result.report_id || result.analysis_id || null;
+    const stockName = result.stock_name || result.stock_symbol || stockCode;
     let history = loadHistory();
     history = history.filter(h => h.stockCode !== stockCode);
-    history.unshift({ stockCode, action, reportId, time: Date.now() });
+    history.unshift({ stockCode, stockName, action, reportId, time: Date.now() });
     if (history.length > HISTORY_MAX) history = history.slice(0, HISTORY_MAX);
     localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-    // 每条记录单独存完整结果，供查看时恢复
     try { localStorage.setItem(`analysis_result_${stockCode}`, JSON.stringify({ result, stockCode, time: Date.now() })); } catch(e) {}
     renderHistory();
   } catch(e) {}
@@ -933,7 +933,7 @@ function renderHistory() {
     const label = h.action || '—';
     const date = new Date(h.time).toLocaleDateString('zh-CN', {month:'numeric', day:'numeric'});
     return `<div class="history-item">
-      <div class="history-item-code">${esc2(h.stockCode)}</div>
+      <div class="history-item-code">${esc2(h.stockName || h.stockCode)}</div>
       <div class="history-item-signal ${cls}">${esc2(label)}</div>
       <div class="history-item-date">${date}</div>
       <div class="history-item-btns">
