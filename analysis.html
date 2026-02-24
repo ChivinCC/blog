@@ -117,6 +117,34 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
 /* 页脚 */
 .page-footer { text-align: center; padding: 28px 16px; border-top: 1px solid var(--border); margin-top: 48px; font-size: 11px; color: var(--text-light); line-height: 2.2; }
 .page-footer strong { color: var(--red); }
+.page-footer a { color: var(--accent); }
+
+/* 历史记录 */
+.history-section { max-width: 900px; margin: 32px auto 0; padding: 0 16px; }
+.history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.history-title { font-family: 'Noto Serif SC', serif; font-size: 15px; font-weight: 600; }
+.history-clear { font-size: 12px; color: var(--text-light); background: none; border: 1px solid var(--border); border-radius: 2px; padding: 4px 10px; cursor: pointer; font-family: inherit; }
+.history-clear:hover { color: var(--red); border-color: var(--red); }
+.history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.history-item { background: var(--card); border: 1px solid var(--border); border-radius: 2px; padding: 14px 16px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.history-item:hover { background: var(--bg2); border-color: var(--accent-light); }
+.history-item-code { font-family: 'Noto Serif SC', serif; font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.history-item-signal { font-size: 11px; font-weight: 500; margin-bottom: 6px; }
+.history-item-signal.buy { color: var(--green); }
+.history-item-signal.sell { color: var(--red); }
+.history-item-signal.hold { color: var(--accent); }
+.history-item-date { font-size: 11px; color: var(--text-light); margin-bottom: 10px; }
+.history-item-btns { display: flex; gap: 6px; }
+.history-btn { flex: 1; font-size: 11px; padding: 5px 0; border-radius: 2px; cursor: pointer; font-family: inherit; text-align: center; transition: background 0.15s; }
+.history-btn-view { background: var(--bg2); border: 1px solid var(--border); color: var(--text-mid); }
+.history-btn-view:hover { background: var(--bg3); }
+.history-btn-pdf { background: var(--accent); border: 1px solid var(--accent); color: white; }
+.history-btn-pdf:hover { background: var(--text); border-color: var(--text); }
+
+@media (max-width: 640px) {
+  .history-section { padding: 0 12px; }
+  .history-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+}
 
 /* PDF打印样式 */
 @media print {
@@ -153,9 +181,11 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
   .nav-search { max-width: 150px; font-size: 12px; }
   .main { padding: 24px 12px 60px; }
   .page-title { font-size: 20px; }
-  .input-row { flex-direction: column; }
-  .input-group { min-width: auto; width: 100%; }
-  .btn-analyze { width: 100%; }
+  /* 移动端布局：股票代码全宽，市场+模式并排，按钮全宽 */
+  .input-row { flex-wrap: wrap; }
+  .input-row .input-group:first-child { width: 100%; flex: none; }
+  .input-row .input-group:not(:first-child):not(:last-child) { flex: 1; min-width: 0; max-width: none !important; }
+  .btn-analyze { width: 100%; flex: none; }
   .progress-stats { gap: 8px; }
   .stat-value { font-size: 15px; }
   .result-header { flex-direction: column; }
@@ -266,10 +296,20 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
   </div>
 </main>
 
+<!-- 历史分析记录 -->
+<div class="history-section" id="historySection" style="display:none">
+  <div class="history-header">
+    <div class="history-title">历史分析记录</div>
+    <button class="history-clear" onclick="clearHistory()">清空</button>
+  </div>
+  <div id="historyList"></div>
+</div>
+
 <footer class="page-footer">
   <div>© 百倍机会攻略 · AI 多智能体投研演示系统</div>
   <div><strong>⚠️ 此系统仅供 AI 技术演示，不提供任何投资建议，切勿当真！</strong></div>
   <div>市场有风险，投资需谨慎。本页面所有分析内容均为 AI 自动生成，不构成任何形式的投资建议或推荐。</div>
+  <div style="margin-top:6px">本页面来源于 Github 开源项目 <a href="https://github.com/hsliuustc/TradingAgents-CN" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px;">TradingAgents-CN</a></div>
 </footer>
 
 <script>
@@ -469,6 +509,13 @@ function toggleSec(i) {
 }
 
 function renderResult(result, stockCode) {
+  // 保存结果到localStorage，防止页面刷新丢失
+  try {
+    localStorage.setItem('last_analysis', JSON.stringify({ result, stockCode, time: Date.now() }));
+  } catch(e) {}
+  // 保存到历史记录
+  saveHistory(result, stockCode);
+
   document.getElementById('resultSection').classList.add('show');
   const name = result.stock_name || result.stock_symbol || stockCode;
   document.getElementById('resultStockName').textContent = `${name}（${stockCode}）`;
@@ -612,6 +659,14 @@ async function startAnalysis() {
         document.getElementById('progressBarFill').style.width = '100%';
         await sleep(600);
         const result = await apiResult(taskId);
+        // 获取report_id用于历史下载
+        try {
+          const rRes = await fetch(`${API_BASE}/api/reports/list`, {headers:{'Authorization':`Bearer ${authToken}`}});
+          const rData = await rRes.json();
+          const reports = rData.data?.reports || rData.reports || [];
+          const report = reports.find(r => r.stock_code === stockCode && r.status === 'completed');
+          if (report) result.report_id = report.id;
+        } catch(e) {}
         hideProgress();
         renderResult(result, stockCode);
         break;
@@ -634,6 +689,138 @@ async function startAnalysis() {
 document.getElementById('stockInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') startAnalysis();
 });
+
+// ===== 历史记录 =====
+const HISTORY_KEY = 'analysis_history';
+const HISTORY_MAX = 20;
+
+function saveHistory(result, stockCode) {
+  try {
+    const da = result.detailed_analysis || {};
+    const action = da.action || result.recommendation?.split('。')[0] || '';
+    const reportId = result.report_id || result.analysis_id || null;
+    let history = loadHistory();
+    // 去重：同一股票代码只保留最新一条
+    history = history.filter(h => h.stockCode !== stockCode);
+    history.unshift({ stockCode, action, reportId, time: Date.now() });
+    if (history.length > HISTORY_MAX) history = history.slice(0, HISTORY_MAX);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    renderHistory();
+  } catch(e) {}
+}
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) { return []; }
+}
+
+function clearHistory() {
+  if (!confirm('确定清空所有历史记录？')) return;
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistory();
+}
+
+function renderHistory() {
+  const history = loadHistory();
+  const section = document.getElementById('historySection');
+  const list = document.getElementById('historyList');
+  if (!history.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = `<div class="history-grid">${history.map((h, i) => {
+    const cls = clsSignal(h.action);
+    const label = h.action || '—';
+    const date = new Date(h.time).toLocaleDateString('zh-CN', {month:'numeric', day:'numeric'});
+    return `<div class="history-item">
+      <div class="history-item-code">${esc2(h.stockCode)}</div>
+      <div class="history-item-signal ${cls}">${esc2(label)}</div>
+      <div class="history-item-date">${date}</div>
+      <div class="history-item-btns">
+        <button class="history-btn history-btn-view" onclick="restoreHistory(${i})">查看</button>
+        <button class="history-btn history-btn-pdf" onclick="downloadHistoryPDF(${i})">PDF</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function esc2(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function restoreHistory(idx) {
+  const history = loadHistory();
+  const h = history[idx];
+  if (!h) return;
+  // 从localStorage找对应的完整结果
+  try {
+    const saved = localStorage.getItem('last_analysis');
+    if (saved) {
+      const { result, stockCode } = JSON.parse(saved);
+      if (stockCode === h.stockCode) {
+        currentStockCode = stockCode;
+        document.getElementById('stockInput').value = stockCode;
+        renderResult(result, stockCode);
+        window.scrollTo({ top: document.getElementById('resultSection').offsetTop - 70, behavior: 'smooth' });
+        return;
+      }
+    }
+  } catch(e) {}
+  // 没有缓存，提示重新分析
+  document.getElementById('stockInput').value = h.stockCode;
+  showError(`${h.stockCode} 的详细结果已过期，请重新提交分析`);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function downloadHistoryPDF(idx) {
+  const history = loadHistory();
+  const h = history[idx];
+  if (!h) return;
+  if (!h.reportId) { showError('该记录无可下载的报告，请重新分析后下载'); return; }
+
+  const btn = document.querySelectorAll('.history-btn-pdf')[idx];
+  if (btn) { btn.textContent = '…'; btn.disabled = true; }
+
+  try {
+    if (!authToken) authToken = await apiLogin();
+    const dlRes = await fetch(`${API_BASE}/api/reports/${h.reportId}/download?format=pdf`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    if (!dlRes.ok) throw new Error('下载失败');
+    const blob = await dlRes.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `投研报告_${h.stockCode}_${new Date(h.time).toLocaleDateString('zh-CN').replace(/\//g,'-')}.pdf`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch(e) {
+    showError('下载失败：' + e.message);
+  } finally {
+    if (btn) { btn.textContent = 'PDF'; btn.disabled = false; }
+  }
+}
+(function restoreLastResult() {
+  // 先渲染历史列表
+  renderHistory();
+
+  try {
+    const saved = localStorage.getItem('last_analysis');
+    if (!saved) return;
+    const { result, stockCode, time } = JSON.parse(saved);
+    // 只恢复24小时内的结果
+    if (Date.now() - time > 24 * 60 * 60 * 1000) return;
+    if (!result || !stockCode) return;
+    currentStockCode = stockCode;
+    document.getElementById('stockInput').value = stockCode;
+
+    // 显示恢复提示
+    const bar = document.createElement('div');
+    bar.style.cssText = 'padding:10px 16px;background:#f7f4ee;border:1px solid var(--border);border-radius:2px;font-size:12px;color:var(--accent);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;';
+    const t = new Date(time).toLocaleString('zh-CN', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    bar.innerHTML = `<span>📋 已恢复上次分析结果（${stockCode} · ${t}）</span><button onclick="this.parentElement.remove()" style="border:none;background:none;cursor:pointer;color:var(--text-light);font-size:16px;line-height:1;">×</button>`;
+    document.querySelector('.input-section').after(bar);
+
+    renderResult(result, stockCode);
+  } catch(e) {}
+})();
 </script>
 </body>
 </html>
