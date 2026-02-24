@@ -20,11 +20,10 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
 .nav-search { flex: 1; max-width: 400px; height: 32px; border: 1px solid var(--border); border-radius: 4px; padding: 0 12px; font-size: 13px; background: var(--bg2); color: var(--text); outline: none; }
 
 .main { max-width: 900px; margin: 0 auto; padding: 40px 16px 80px; }
-.page-header { margin-bottom: 32px; padding-bottom: 20px; border-bottom: 2px solid var(--text); }
-.page-label { font-size: 12px; color: var(--accent); letter-spacing: 2px; margin-bottom: 8px; }
-.page-title { font-family: 'Noto Serif SC', serif; font-size: 26px; font-weight: 600; margin-bottom: 8px; }
-.page-desc { font-size: 13px; color: var(--text-light); line-height: 1.8; }
-.page-warning { font-size: 12px; color: var(--red); margin-top: 6px; font-weight: 500; }
+.page-header { margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.page-title { font-family: 'Noto Serif SC', serif; font-size: 24px; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.02em; }
+.page-desc { font-size: 13px; color: var(--text-mid); line-height: 1.7; margin-bottom: 8px; }
+.page-warning { font-size: 11px; color: var(--text-light); letter-spacing: 0.05em; }
 
 .input-section { background: var(--card); border: 1px solid var(--border); border-radius: 2px; padding: 24px; margin-bottom: 24px; }
 .input-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
@@ -74,7 +73,7 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
 .signal-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .signal-extra { font-size: 12px; color: var(--text-light); }
 
-.report-warning { background: #fff3f3; border: 1px solid #f5c0c0; border-left: 3px solid var(--red); border-radius: 0 2px 2px 0; padding: 10px 16px; margin-bottom: 20px; font-size: 12px; color: var(--red); font-weight: 500; }
+.report-warning { background: var(--bg2); border: 1px solid var(--border); border-radius: 2px; padding: 10px 16px; margin-bottom: 20px; font-size: 11px; color: var(--text-light); letter-spacing: 0.04em; }
 
 .download-bar { display: flex; justify-content: flex-end; margin-bottom: 20px; }
 .btn-download { display: inline-flex; align-items: center; gap: 6px; padding: 10px 22px; background: var(--accent); color: white; border: none; border-radius: 2px; font-size: 13px; font-family: 'Noto Sans SC', sans-serif; cursor: pointer; transition: background 0.2s; letter-spacing: 0.5px; }
@@ -150,10 +149,9 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
   .nav, .input-section, .progress-section, .error-bar, .download-bar, .page-footer, .report-warning { display: none !important; }
   body { background: white !important; font-size: 12px; color: #2c2c2c; }
   .main { padding: 0 !important; max-width: 100% !important; }
-  .page-header { border-bottom: 2px solid #2c2c2c; margin-bottom: 20px; padding-bottom: 14px; }
-  .page-label { color: #8b6f47 !important; }
+  .page-header { border-bottom: 1px solid #ccc; margin-bottom: 20px; padding-bottom: 14px; }
   .page-title { font-size: 20px; }
-  .page-warning { color: #b85450 !important; }
+  .page-warning { display: none; }
   .result-section { display: block !important; }
   .result-header { border-bottom: 1px solid #d8d0c0; margin-bottom: 12px; }
   .result-stock-name { font-size: 16px; }
@@ -201,10 +199,9 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
 
 <main class="main">
   <div class="page-header">
-    <div class="page-label">百倍机会攻略</div>
     <h1 class="page-title">AI 多智能体投研分析</h1>
-    <p class="page-desc">由多个 AI 分析师协同完成，涵盖技术面、基本面、市场情绪与新闻舆情，综合输出投资研判。</p>
-    <p class="page-warning">⚠️ 此系统仅供 AI 技术演示，不提供任何投资建议，切勿当真！</p>
+    <p class="page-desc">多位 AI 分析师协同，覆盖技术面、基本面、新闻舆情，一键生成完整投研报告</p>
+    <p class="page-warning">此系统仅供 AI 项目演示，内容由 AI 自动生成，不提供任何投资建议，切勿当真！</p>
   </div>
 
   <div class="input-section">
@@ -254,7 +251,7 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
 
   <div class="result-section" id="resultSection">
     <!-- PDF打印时显示的免责 -->
-    <div class="pdf-disclaimer">⚠️ 此系统仅供 AI 技术演示，不提供任何投资建议，切勿当真！本报告由 AI 自动生成，不构成任何投资建议。</div>
+    <div class="pdf-disclaimer">⚠️ 此系统仅供 AI 项目演示，内容由 AI 自动生成，不提供任何投资建议，切勿当真！</div>
 
     <div class="result-header">
       <div class="result-stock-name" id="resultStockName"></div>
@@ -263,7 +260,7 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
 
     <div class="signal-row" id="signalRow"></div>
 
-    <div class="report-warning">⚠️ 此系统仅供 AI 技术演示，不提供任何投资建议，切勿当真！以下内容由 AI 自动生成，仅作技术展示。</div>
+    <div class="report-warning">此系统仅供 AI 项目演示，内容由 AI 自动生成，不提供任何投资建议，切勿当真！</div>
 
     <div class="verdict-card">
       <div class="verdict-label">核心研判（演示）</div>
@@ -275,14 +272,14 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
     <div class="invest-card" id="investCard" style="display:none">
       <div class="invest-label">投资建议（演示）</div>
       <div class="invest-text" id="investText"></div>
-      <div style="margin-top:10px;font-size:11px;color:#4a7c59;opacity:0.8;">以上为 AI 演示性建议，完整分析详见 PDF 报告，不构成真实投资建议</div>
+      <div style="margin-top:10px;font-size:11px;color:#4a7c59;opacity:0.8;">此系统仅供 AI 项目演示，内容由 AI 自动生成，不提供任何投资建议，切勿当真！</div>
     </div>
 
     <!-- PDF打印时结尾免责 -->
-    <div class="pdf-disclaimer">⚠️ 重要免责声明：此系统仅供 AI 技术演示，不提供任何投资建议，切勿当真！股票投资有风险，市场情况随时变化，任何投资决策请结合自身情况，并咨询专业持牌投资顾问。</div>
+    <div class="pdf-disclaimer">⚠️ 免责声明：此系统仅供 AI 项目演示，内容由 AI 自动生成，不提供任何投资建议，切勿当真！</div>
 
     <div class="disclaimer">
-      <strong>⚠️ 重要免责声明：</strong>以上全部内容由 AI 多智能体系统自动生成，此系统仅供 AI 技术演示，不提供任何投资建议，切勿当真！股票投资有风险，市场情况随时变化，任何投资决策请结合自身情况，并咨询专业持牌投资顾问。
+      <strong>⚠️ 免责声明：</strong>此系统仅供 AI 项目演示，内容由 AI 自动生成，不提供任何投资建议，切勿当真！股票投资有风险，市场情况随时变化，任何投资决策请结合自身情况，并咨询专业持牌投资顾问。
     </div>
   </div>
 
@@ -308,8 +305,8 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
 
 <footer class="page-footer">
   <div>© 百倍机会攻略 · AI 多智能体投研演示系统</div>
-  <div><strong>⚠️ 此系统仅供 AI 技术演示，不提供任何投资建议，切勿当真！</strong></div>
-  <div>市场有风险，投资需谨慎。本页面所有分析内容均为 AI 自动生成，不构成任何形式的投资建议或推荐。</div>
+  <div><strong>⚠️ 此系统仅供 AI 项目演示，内容由 AI 自动生成，不提供任何投资建议，切勿当真！</strong></div>
+  <div>市场有风险，投资需谨慎。任何投资决策请结合自身情况，并咨询专业持牌投资顾问。</div>
   <div style="margin-top:6px">本页面来源于 Github 开源项目 TradingAgents-CN</div>
 </footer>
 
