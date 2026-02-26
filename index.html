@@ -67,14 +67,14 @@ nav {
   font-family: var(--serif); font-weight: 600; font-size: 15px;
   color: var(--t1); letter-spacing: 0.05em; white-space: nowrap;
 }
-.search-wrap { position: relative; flex: 1; }
+.search-wrap { position: relative; flex: 1; min-width: 0; }
 .search-wrap svg {
   position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
   width: 13px; height: 13px; color: var(--t3); pointer-events: none;
 }
 #searchInput {
   width: 100%; padding: 7px 12px 7px 30px;
-  border: 1px solid var(--line); border-radius: 6px;
+  border: 1px solid var(--line); border-radius: 2px;
   background: var(--bg2); font-size: 13px; color: var(--t1); outline: none;
   transition: border-color .2s, box-shadow .2s;
 }
@@ -507,17 +507,6 @@ footer {
       </div>
     </div>
 
-    <!-- AI投研入口 -->
-    <a href="https://www.baibei.xyz/analysis.html" class="ai-entry" target="_blank" rel="noopener">
-      <div class="ai-entry-title">AI 多智能体投研分析</div>
-      <div class="ai-entry-desc">多位 AI 分析师协同，覆盖技术面、基本面、新闻舆情，一键生成完整投研报告</div>
-      <div class="ai-entry-cta">
-        免费体验
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14">
-          <path d="M5 12h14M12 5l7 7-7 7"/>
-        </svg>
-      </div>
-    </a>
 
     <!-- 文章列表标题 -->
     <div class="list-divider">最新文章</div>
