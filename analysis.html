@@ -196,6 +196,15 @@ body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: va
 </style>
 </head>
 <body>
+
+<!-- 升级弹窗 -->
+<div id="upgradeModal" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);">
+  <div style="background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:40px 36px;max-width:340px;width:90%;text-align:center;">
+    <div style="font-size:28px;margin-bottom:16px;">🔧</div>
+    <div style="font-family:'Noto Serif SC',serif;font-size:18px;font-weight:600;color:var(--text);margin-bottom:12px;">本站升级中</div>
+    <div style="font-size:13px;color:var(--text-light);line-height:1.8;">停止服务</div>
+  </div>
+</div>
 <nav class="nav">
   <a href="/" class="nav-brand">百倍机会攻略</a>
   <input class="nav-search" type="text" placeholder="搜索文章标题或正文……">
